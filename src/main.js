@@ -44,6 +44,8 @@ import TreeSelect from '@/components/TreeSelect'
 // 字典标签组件
 import DictTag from '@/components/DictTag'
 
+import Particles from 'particles.vue3'
+
 const app = createApp(App)
 
 // 全局方法挂载
@@ -70,6 +72,7 @@ app.use(router)
 app.use(store)
 app.use(plugins)
 app.use(elementIcons)
+app.use(Particles)
 app.component('svg-icon', SvgIcon)
 
 directive(app)
