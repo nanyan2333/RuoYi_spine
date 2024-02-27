@@ -8,7 +8,7 @@
       >
         <template #title>
           <img
-            src="./assets/gli.png"
+            src="@/assets/images/gli.png"
             alt=""
           />
           <span class="titleFont">已连接</span>
