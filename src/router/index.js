@@ -83,6 +83,50 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/info',
+    component: Layout,
+    hidden: true,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'showStatus',
+        component: () => import('@/views/info/showStatus/index.vue'),
+        name: 'ShowStatus'
+      }
+    ]
+  },
+  {
+    path: '/manage',
+    component: Layout,
+    hidden: true,
+    redirect: 'noredirect',
+    children: [
+      {
+        path:'controlStatus',
+        component: () => import('@/views/manage/controlStatus/index.vue'),
+        name: 'ControlStatus'
+      }
+    ]
+  },
+  {
+    path: '/message',
+    component: Layout,
+    hidden: true,
+    redirect: 'noredirect',
+    children: [
+      {
+        path:'historyStatus',
+        component: () => import('@/views/message/historyStatus/index.vue'),
+        name: 'HistoryStatus'
+      },
+      {
+        path:'useHistory',
+        component: () => import('@/views/message/useHistory/index.vue'),
+        name: 'UseHistory'
+      }
+    ]
   }
 ]
 

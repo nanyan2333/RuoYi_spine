@@ -27,6 +27,19 @@ import './permission' // permission control
 import { useDict } from '@/utils/dict'
 import { parseTime, resetForm, addDateRange, handleTree, selectDictLabel, selectDictLabels } from '@/utils/ruoyi'
 
+import ECharts from "vue-echarts"
+import { use } from "echarts/core"
+
+// 手动引入 ECharts 各模块来减小打包体积
+import { CanvasRenderer } from "echarts/renderers"
+import { LineChart } from "echarts/charts"
+import { GridComponent, TooltipComponent } from "echarts/components"
+use([
+  CanvasRenderer,
+  LineChart,
+  GridComponent,
+  TooltipComponent
+]);
 // 分页组件
 import Pagination from '@/components/Pagination'
 // 自定义表格工具组件
@@ -67,6 +80,7 @@ app.component('ImageUpload', ImageUpload)
 app.component('ImagePreview', ImagePreview)
 app.component('RightToolbar', RightToolbar)
 app.component('Editor', Editor)
+app.component('v-chart', ECharts)
 
 app.use(router)
 app.use(store)
