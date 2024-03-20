@@ -31,7 +31,7 @@ export default defineConfig(({ mode, command }) => {
       proxy: {
         // https://cn.vitejs.dev/config/#server-proxy
         '/dev-api': {
-          target: 'http://8.141.90.154:8080',
+          target: 'https://7b763335-843c-4f15-80e0-db5613efc7dc.mock.pstmn.io',
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/dev-api/, '')
         }
