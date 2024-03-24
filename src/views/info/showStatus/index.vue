@@ -3,11 +3,11 @@
 		<div class="button-group">
 			<el-button type="primary" @click="addDevice">AddDevice</el-button>
 		</div>
-		<el-table v-loading="loading" :data="tableData" v-model="tableLayout">
-			<el-table-column prop="number" label="number" />
-			<el-table-column prop="id" label="id" />
-			<el-table-column prop="address" label="Address" />
-			<el-table-column prop="disable" label="Disable">
+		<el-table v-loading="loading" :data="Store.dataList" v-model="tableLayout">
+			<el-table-column prop="name" label="name" />
+			<el-table-column prop="host" label="host" />
+			<el-table-column prop="port" label="port" />
+			<el-table-column prop="disable" label="disable">
 				<template #default="scope">
 					<el-switch
 						v-model="scope.row.disable"
@@ -29,49 +29,65 @@
 				</template>
 			</el-table-column>
 		</el-table>
+
+		<el-dialog
+			v-model="openDeleteDialogo"
+			title="Warning"
+			width="500"
+			align-center
+		>
+			<span>是否删除该设备，此操作不可逆</span>
+			<template #footer>
+				<div class="dialog-footer">
+					<el-button @click="cancelDelete">Cancel</el-button>
+					<el-button type="primary" @click="confirmDelete">Confirm</el-button>
+				</div>
+			</template>
+		</el-dialog>
+
+		<el-dialog
+			v-model="openAddDevForm"
+			header="AddDevice"
+			width="500"
+			align-center
+			:close-on-click-modal="false"
+		>
+			<el-form :model="form" label-width="auto" style="max-width: 600px">
+				<el-form-item label="连接名">
+					<el-input v-model="form.name" />
+				</el-form-item>
+				<el-form-item label="host">
+					<el-input v-model="form.host" />
+				</el-form-item>
+				<el-form-item label="端口">
+					<el-input v-model="form.port" />
+				</el-form-item>
+				<el-form-item label="用户名">
+					<el-input v-model="form.username"></el-input>
+				</el-form-item>
+				<el-form-item label="密码">
+					<el-input v-model="form.password"></el-input>
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<div class="connect-dialog-botton">
+					<el-button
+						type="primary"
+						@click="onSubmit"
+						style="margin: 0px 30px 0px 130px"
+						>Create</el-button
+					>
+					<el-button @click="openAddDevForm = false">Cancel</el-button>
+				</div>
+			</template>
+		</el-dialog>
 	</div>
-
-	<el-dialog
-		v-model="openDeleteDialogo"
-		title="Warning"
-		width="500"
-		align-center
-	>
-		<span>是否删除该设备，此操作不可逆</span>
-		<template #footer>
-			<div class="dialog-footer">
-				<el-button @click="cancelDelete">Cancel</el-button>
-				<el-button type="primary" @click="confirmDelete">Confirm</el-button>
-			</div>
-		</template>
-	</el-dialog>
-
-	<el-dialog
-		v-model="openAddDevForm"
-		header="AddDevice"
-		width="500"
-		align-center
-	>
-		<el-form :model="form" label-width="auto" style="max-width: 600px">
-			<el-form-item label="device number">
-				<el-input v-model="form.number" />
-			</el-form-item>
-			<el-form-item label="device id">
-				<el-input v-model="form.id" />
-			</el-form-item>
-			<el-form-item label="device address">
-				<el-input v-model="form.address" />
-			</el-form-item>
-			<el-form-item>
-				<el-button type="primary" @click="onSubmit" style="margin: 0px 30px 0px 130px;">Create</el-button>
-				<el-button @click="openAddDevForm = false">Cancel</el-button>
-			</el-form-item>
-		</el-form>
-	</el-dialog>
 </template>
 
 <script setup>
 import { reactive, ref } from "vue"
+import useDeviceStore from "@/store/modules/device.js"
+const Store = useDeviceStore()
 const loading = ref(false)
 const tableLayout = ref("auto")
 const activeid = ref("1")
@@ -81,31 +97,34 @@ const openDeleteDialogo = ref(false)
 const openAddDevForm = ref(false)
 
 const tableData = reactive([
-	{
-		number: "1",
-		id: "Tom",
-		address: "No. 189, Grove St, Los Angeles",
-	},
-	{
-		number: "2",
-		id: "Tom",
-		address: "No. 189, Grove St, Los Angeles",
-	},
-	{
-		number: "3",
-		id: "Tom",
-		address: "No. 189, Grove St, Los Angeles",
-	},
-	{
-		number: "4",
-		id: "Tom",
-		address: "No. 189, Grove St, Los Angeles",
-	},
+	// {
+	// 	number: "1",
+	// 	id: "Tom",
+	// 	address: "No. 189, Grove St, Los Angeles",
+	// },
+	// {
+	// 	number: "2",
+	// 	id: "Tom",
+	// 	address: "No. 189, Grove St, Los Angeles",
+	// },
+	// {
+	// 	number: "3",
+	// 	id: "Tom",
+	// 	address: "No. 189, Grove St, Los Angeles",
+	// },
+	// {
+	// 	number: "4",
+	// 	id: "Tom",
+	// 	address: "No. 189, Grove St, Los Angeles",
+	// },
 ])
 const form = reactive({
-	number: "",
-	id: "",
-	address: "",
+	name: "",
+	host: "",
+	port: "",
+	username: "",
+	password: "",
+	disable: false,
 })
 
 const handleDelete = (index, row) => {
@@ -128,15 +147,14 @@ const cancelDelete = () => {
 	deleteIndex.value = null
 }
 const onSubmit = () => {
-	tableData.push({
-		number: form.number,
-		id: form.id,
-		address: form.address,
-	})
-	form.number = ""
-	form.id = ""
-	form.address = ""
-	openAddDevForm.value = false
+	Store.connectDevice(form)
+		.then((res) => {
+			Store.deviceList.push(form)
+			Store.deviceNum++
+		})
+		.catch((err) => {
+			console.log(err)
+		})
 }
 const addDevice = () => {
 	openAddDevForm.value = true
@@ -156,5 +174,8 @@ const addDevice = () => {
 
 .el-button {
 	margin-right: 10px;
+}
+.connect-dialog-button {
+	margin-right: 20px;
 }
 </style>
