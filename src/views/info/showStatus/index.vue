@@ -85,6 +85,7 @@
 </template>
 
 <script setup>
+//test
 import { reactive, ref } from "vue"
 import useDeviceStore from "@/store/modules/device.js"
 const Store = useDeviceStore()
