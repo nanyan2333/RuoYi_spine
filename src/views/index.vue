@@ -1,6 +1,6 @@
 <template>
 	<div class="layout_index">
-		<div class="carousel">
+		<div class="carousel">gi
 			<el-carousel height="562.5px">
 				<el-carousel-item v-for="(item, index) in img_list" :key="index">
 					<el-image :src="item" fit="fill"></el-image>
@@ -15,34 +15,21 @@
 		</div>
 
 		<div class="timeline">
-			<el-card shadow="hover">
+			<el-card shadow="always">
 				<template #header>
 					<div>
-						<span> 待定任务 </span>
+					<span> 待定任务 </span>
 					</div>
 				</template>
-				<el-timeline>
-					<el-timeline-item
-						v-for="(activity, index) in activities"
-						:key="index"
-						:icon="activity.icon"
-						:type="activity.type"
-						:color="activity.color"
-						:size="activity.size"
-						:hollow="activity.hollow"
-						:timestamp="activity.timestamp"
-					>
-						{{ activity.content }}
-					</el-timeline-item>
-				</el-timeline>
-			</el-card>
-			<el-card shadow="hover">
-				<template #header>
-					<div>
-						<span>service info</span>
-					</div>
-				</template>
-				{{ res }}
+				<div style="margin: 20px 0" />
+					<div v-for="(task, index) in tasks" :key="index" class="task-item">
+						<span>任务{{ index + 1 }}</span>
+						<el-input
+						v-model="task.content"
+						placeholder="请输入内容"
+						@keyup.enter="addInput(index)"
+					/>
+				</div>
 			</el-card>
 		</div>
 	</div>
@@ -85,6 +72,10 @@ const activities = [
 		timestamp: "2018-04-03 20:46",
 	},
 ]
+const tasks = ref([{ content: '' }])
+const addInput = (index) => {
+  tasks.value.splice(index + 1, 0, { content: '' })
+}
 var res = ref("")
 </script>
 
@@ -111,5 +102,31 @@ var res = ref("")
 .chart {
 	width: 900px;
 	height: 400px;
+}
+.task-item {
+  display: flex;
+  flex-direction: column; /* 改为垂直布局 */
+  align-items: flex-start; /* 文字左对齐 */
+  margin-bottom: 10px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  font-size: 1rem;
+  text-shadow: none; /* 移除文字阴影 */
+  transition: all 0.3s ease;
+}
+
+
+.task-item input {
+  margin-bottom: 10px; /* 为输入框添加底部边距 */
+}
+
+
+.task-item:hover {
+  transform: translateY(-2px); /* 鼠标悬停时轻微上移，增加交互感 */
+  box-shadow: 0px 4px 5px rgba(0,0,0,0.2); /* 鼠标悬停时添加阴影，突出显示 */
+}
+
+.task-item span {
+  margin-right: 10px;
 }
 </style>
