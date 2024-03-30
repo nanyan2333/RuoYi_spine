@@ -18,7 +18,7 @@
 			<el-card shadow="hover">
 				<template #header>
 					<div>
-						<span> 待定任务 </span>
+						<span> 待定任务. </span>
 					</div>
 				</template>
 				<el-timeline>
