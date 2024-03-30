@@ -1,23 +1,53 @@
 <template>
 	<div class="input-form">
-		{{ data }}
+		<el-button @click="openAddSubscribeForm = true">新增订阅</el-button>
+		<el-dialog title="新增订阅" v-model="openAddSubscribeForm">
+			<el-form
+				:model="addSubscribeForm"
+				label-width="100px"
+			>
+				<el-form-item label="订阅名称" prop="name">
+					<el-input v-model="addSubscribeForm.topic"></el-input>
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<div><el-button @click="subscribe(addSubscribeForm)"> 订阅 </el-button></div>
+			</template>
+		</el-dialog>
+		<div>{{ data }}</div>
 	</div>
 </template>
 
 <script setup name="Index">
-import useMqtt from '@/utils/mqtt'
-
-
-
-const  {startMqtt} = useMqtt();
-const data = ref('null')
-startMqtt('test',(topic,message) => {
-  data = JSON.parse(message.toSring());
-  console.log(data)
+import mqtt from "@/utils/mqtt"
+import { reactive, ref } from "vue"
+const openAddSubscribeForm = ref(false)
+const { startMqtt } = mqtt.useMqtt()
+const data = ref("null")
+const addSubscribeForm = ref({
+	topic: "",
+	disabled: true,
 })
-
-//验证规则
-
+const data2 = ref("null")
+console.log(addSubscribeForm)
+const subscribe = (addSubscribeForm) => {
+	console.log(addSubscribeForm)
+	if(addSubscribeForm.disabled){
+		startMqtt(addSubscribeForm.topic,(topic,payload,packet) => {
+			data.value = mqtt.unit8ArrayToString(payload)
+		})
+	}
+	openAddSubscribeForm.value = false
+}
+// startMqtt("test", (topic, payload, packet) => {
+// 	data.value = mqtt.unit8ArrayToString(payload)
+// 	console.log(JSON.parse(data.value))
+// 	console.log(packet)
+// })
+// startMqtt("try", (topic, message) => {
+// 	console.log(topic)
+// 	console.log(message)
+// })
 </script>
 
 <style scoped lang="scss">

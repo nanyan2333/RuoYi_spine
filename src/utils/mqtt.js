@@ -4,8 +4,7 @@ import { ref, onUnmounted } from 'vue';
 class MQTT {
     constructor(topic) {
         this.topic = topic;
-        this.url = 'ws://124.71.78.224:8083';
-        this.clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
+        this.url = 'ws://124.71.78.224:8083/mqtt';
     }
 
     init() {
@@ -56,28 +55,42 @@ class MQTT {
     }
 }
 
-export default function useMqtt() {
-    const PublicMqtt = ref(null);
+export default {
+    useMqtt() {
+        const PublicMqtt = ref(null);
 
-    const startMqtt = (val, callback) => {
-        PublicMqtt.value = new MQTT(val);
-        PublicMqtt.value.init();
-        PublicMqtt.value.link();
-        getMessage(callback);
-    };
+        const startMqtt = (val, callback) => {
+            PublicMqtt.value = new MQTT(val);
+            PublicMqtt.value.init();
+            PublicMqtt.value.link();
+            getMessage(callback);
+        };
 
-    const getMessage = (callback) => {
-        PublicMqtt.value?.get(callback);
-    };
+        const getMessage = (callback) => {
+            PublicMqtt.value?.get(callback);
+        };
 
-    onUnmounted(() => {
-        if (PublicMqtt.value) {
-            PublicMqtt.value.unsubscribes();
-            PublicMqtt.value.over();
+        onUnmounted(() => {
+            if (PublicMqtt.value) {
+                PublicMqtt.value.unsubscribes();
+                PublicMqtt.value.over();
+            }
+        });
+
+        return {
+            startMqtt,
+        };
+    },
+    unit8ArrayToString(array) {
+        let str = '';
+        for (let i = 0; i < array.length; i++) {
+            str += String.fromCharCode(array[i]);
         }
-    });
-
-    return {
-        startMqtt,
-    };
+        return str;
+    },
+    unit8ArrayToJson(array) {
+        return JSON.parse(this.unit8ArrayToString(array))
+    }
 }
+
+
