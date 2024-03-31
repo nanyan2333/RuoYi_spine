@@ -1,6 +1,7 @@
 <template>
 	<div class="layout_index">
-		<div class="carousel">
+		<el-row :gutter="100">
+			<div class="carousel">
 			<el-carousel height="562.5px">
 				<el-carousel-item v-for="(item, index) in img_list" :key="index">
 					<el-image :src="item" fit="fill"></el-image>
@@ -38,13 +39,43 @@
 			</el-card>
 			<el-card shadow="hover">
 				<template #header>
-					<div>
-						<span>service info</span>
+					<div>			
+						<span><el-icon><Menu /></el-icon> 设备统计</span>
 					</div>
 				</template>
-				{{ res }}
+				<!-- <el-row :gutter="10">
+					<el-card class="custom-border">
+						<el-col :span="4"> <el-icon><FirstAidKit /></el-icon> </el-col>			
+						<el-col :span="10"> nihao</el-col>
+					</el-card>
+					<el-card class="custom-border">
+						<el-col :span="4"> <el-icon><FirstAidKit /></el-icon> </el-col>			
+						<el-col :span="20"> nihao</el-col>
+					</el-card>
+					<el-card class="custom-border">
+						<el-col :span="4"> <el-icon><FirstAidKit /></el-icon> </el-col>			
+						<el-col :span="20"> nihao</el-col>
+					</el-card>
+				</el-row> -->
+				<el-row :gutter="20">
+					<el-col :span="12">
+						<el-card class="rounded-card">
+							<span><el-icon><Menu /></el-icon> 设备数量</span>
+						</el-card>
+					</el-col>
+					<el-col :span="12"><el-card class="rounded-card">监控信息</el-card></el-col>
+				</el-row>
+				<el-row :gutter="20">
+					<el-col :span="12"><el-card class="rounded-card">操作记录</el-card></el-col>
+					<el-col :span="12"><el-card class="rounded-card">报警信息</el-card></el-col>
+				</el-row>
 			</el-card>
 		</div>
+		
+		</el-row>
+
+		
+				
 	</div>
 </template>
 
@@ -112,4 +143,18 @@ var res = ref("")
 	width: 900px;
 	height: 400px;
 }
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+}
+.el-row {
+  margin-bottom: 20px;
+}
+.el-row:last-child {
+  margin-bottom: 0;
+}
+.el-col {
+  border-radius: 4px;
+}
+
 </style>
