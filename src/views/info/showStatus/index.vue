@@ -1,86 +1,140 @@
 <template>
-	<div class="container">
-		<div class="button-group">
-			<el-button type="primary" @click="addDevice">AddDevice</el-button>
-		</div>
-		<el-table v-loading="loading" :data="Store.dataList" v-model="tableLayout">
-			<el-table-column prop="name" label="name" />
-			<el-table-column prop="host" label="host" />
-			<el-table-column prop="port" label="port" />
-			<el-table-column prop="disable" label="disable">
-				<template #default="scope">
-					<el-switch
-						v-model="scope.row.disable"
-						active-color="#13ce66"
-						inactive-color="#ff4949"
-						active-text="启用"
-						inactive-text="停用"
-					/>
-				</template>
-			</el-table-column>
-			<el-table-column label="Operation">
-				<template #default="scope">
-					<el-button
-						type="danger"
-						@click="handleDelete(scope.$index, scope.row)"
+	<div>
+		<el-card style="margin-bottom: 6px">
+			<el-form
+				:model="queryParams"
+				:inline="true"
+				label-width="75px"
+				style="margin-bottom: -20px">
+				<el-form-item label="设备名称">
+					<el-input
+						v-model="queryParams.deviceName"
+						placeholder="请输入设备名称"
+						clearable
+						style="width: 150px" />
+				</el-form-item>
+				<el-form-item label="设备编号">
+					<el-input
+						v-model="queryParams.serialNumber"
+						placeholder="请输入设备编号"
+						clearable
+						style="width: 150px" />
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" size="mini" @click="handleQuery"
+						><el-icon><Search /></el-icon> 搜索</el-button
 					>
-						Delete
-					</el-button>
-				</template>
-			</el-table-column>
-		</el-table>
-
-		<el-dialog
-			v-model="openDeleteDialogo"
-			title="Warning"
-			width="500"
-			align-center
-		>
-			<span>是否删除该设备，此操作不可逆</span>
-			<template #footer>
-				<div class="dialog-footer">
-					<el-button @click="cancelDelete">Cancel</el-button>
-					<el-button type="primary" @click="confirmDelete">Confirm</el-button>
-				</div>
-			</template>
-		</el-dialog>
-
-		<el-dialog
-			v-model="openAddDevForm"
-			header="AddDevice"
-			width="500"
-			align-center
-			:close-on-click-modal="false"
-		>
-			<el-form :model="form" label-width="auto" style="max-width: 600px">
-				<el-form-item label="连接名">
-					<el-input v-model="form.name" />
+					<el-button size="mini" @click="resetQuery"
+						><el-icon><refresh /></el-icon>重置</el-button
+					>
 				</el-form-item>
-				<el-form-item label="host">
-					<el-input v-model="form.host" />
-				</el-form-item>
-				<el-form-item label="端口">
-					<el-input v-model="form.port" />
-				</el-form-item>
-				<el-form-item label="用户名">
-					<el-input v-model="form.username"></el-input>
-				</el-form-item>
-				<el-form-item label="密码">
-					<el-input v-model="form.password"></el-input>
-				</el-form-item>
-			</el-form>
-			<template #footer>
-				<div class="connect-dialog-botton">
+				<el-form-item style="float: right">
 					<el-button
 						type="primary"
-						@click="onSubmit"
-						style="margin: 0px 30px 0px 130px"
-						>Create</el-button
+						plain
+						size="mini"
+						@click="handleEditDevice(0)"
+						><el-icon><plus /></el-icon>新增</el-button
 					>
-					<el-button @click="openAddDevForm = false">Cancel</el-button>
-				</div>
-			</template>
-		</el-dialog>
+				</el-form-item>
+			</el-form>
+		</el-card>
+
+		<el-card style="padding-bottom: 100px">
+			<el-row :gutter="30" v-loading="loading">
+				<el-col
+					:xs="24"
+					:sm="12"
+					:md="12"
+					:lg="8"
+					:xl="6"
+					v-for="(item, index) in deviceList"
+					:key="index"
+					style="margin-bottom: 30px; text-align: center">
+					<el-card
+						:body-style="{ padding: '20px' }"
+						shadow="always"
+						class="card-item">
+						<el-row :gutter="10" justify="space-between">
+							<el-col :span="20" style="text-align: left">
+								<!-- <svg-icon icon-class="device" v-if="item.isOwner == 1" /> -->
+								<span style="margin: 0 5px">{{ item.deviceName }}</span>
+								<!-- <el-tag size="mini" type="info">Ver {{item.firmwareVersion}}</el-tag>-->
+								<!-- <el-text v-if="item.protocolCode" type="info" size="mini" style="font-size: 14px; color: #ccc">{{ item.protocolCode }}</el-text> -->
+							</el-col>
+						</el-row>
+						<el-row :gutter="10">
+							<el-col :span="17">
+								<div
+									style="
+										text-align: left;
+										line-height: 40px;
+										white-space: nowrap;
+									">
+									<span style="display: inline-block; margin: 0 10px">
+										<!-- <el-tag type="success" size="small" v-if="item.isShadow == 1">影子</el-tag>
+                    <el-tag type="info" size="small" v-else>影子</el-tag> -->
+										<el-tag
+											type="primary"
+											size="small"
+											v-if="item.protocolCode"
+											>{{ item.protocolCode }}</el-tag
+										>
+									</span>
+									<el-tag type="primary" size="small" v-if="item.transport">{{
+										item.transport
+									}}</el-tag>
+									<!-- <dict-tag :options="dict.type.iot_location_way" :value="item.locationWay" size="small" style="display:inline-block;" /> -->
+									<!-- <dict-tag :options="dict.type.iot_transport_type" :value="item.transport" size="small" style="display: inline-block" /> -->
+								</div>
+								<el-descriptions
+									:column="1"
+									size="mini"
+									style="white-space: nowrap">
+									<el-descriptions-item label="编号">
+										{{ item.serialNumber }}
+									</el-descriptions-item>
+									<el-descriptions-item label="产品">
+										{{ item.productName }}
+									</el-descriptions-item>
+									<el-descriptions-item label="激活时间">
+										{{ parseTime(item.activeTime, "{y}-{m}-{d}") }}
+									</el-descriptions-item>
+								</el-descriptions>
+							</el-col>
+							<el-col :span="7">
+								<div style="margin-top: 10px">
+									<img
+										src="@/assets/images/product.png"
+										alt="未加载"
+										style="width: 120px; height: auto" />
+								</div>
+							</el-col>
+						</el-row>
+						<el-button-group style="margin-top: 15px">
+							<el-button type="danger" size="mini" style="padding: 5px 10px"
+								>删除</el-button
+							>
+							<el-button type="primary" size="mini" style="padding: 5px 15px"
+								>查看</el-button
+							>
+							<el-button type="success" size="mini" style="padding: 5px 15px"
+								>运行状态</el-button
+							>
+						</el-button-group>
+					</el-card>
+				</el-col>
+			</el-row>
+			<el-empty description="暂无数据，请添加设备" v-if="total == 0"></el-empty>
+		</el-card>
+		<div style="padding: 20px;">
+			<pagination
+			v-show="total > 0"
+			:total="total"
+			v-model:page="queryParams.pageNum"
+			v-model:limit="queryParams.pageSize"
+			@pagination="getList" />
+		</div>
 	</div>
 </template>
 
@@ -88,87 +142,85 @@
 //test
 import { reactive, ref } from "vue"
 import useDeviceStore from "@/store/modules/device.js"
+
 const Store = useDeviceStore()
-const loading = ref(false)
-const tableLayout = ref("auto")
-const activeid = ref("1")
-const isDelete = ref(false)
-const deleteIndex = ref(null)
-const openDeleteDialogo = ref(false)
-const openAddDevForm = ref(false)
-
-const tableData = reactive([
-	// {
-	// 	number: "1",
-	// 	id: "Tom",
-	// 	address: "No. 189, Grove St, Los Angeles",
-	// },
-	// {
-	// 	number: "2",
-	// 	id: "Tom",
-	// 	address: "No. 189, Grove St, Los Angeles",
-	// },
-	// {
-	// 	number: "3",
-	// 	id: "Tom",
-	// 	address: "No. 189, Grove St, Los Angeles",
-	// },
-	// {
-	// 	number: "4",
-	// 	id: "Tom",
-	// 	address: "No. 189, Grove St, Los Angeles",
-	// },
-])
-const form = reactive({
-	name: "",
-	host: "",
-	port: "",
-	username: "",
-	password: "",
-	disable: false,
+const queryParams = reactive({
+	deviceName: "",
+	serialNumber: "",
+	pageNum: 1,
+	pageSize: 10,
 })
+const total = ref(3)
+const deviceList = ref([
+	{
+		deviceId: 118,
+		deviceName: "666",
+		productId: 66,
+		productName: "999",
+		serialNumber: "D4AD203F3A1C",
+		activeTime: "2023-03-23",
+		createTime: "2025-02-28",
+		transport: "MQTT",
+	},
+	{
+		deviceId: 118,
+		deviceName: "666",
+		productId: 66,
+		productName: "999",
+		serialNumber: "D4AD203F3A1C",
+		activeTime: "2023-03-23",
+		createTime: "2025-02-28",
+		transport: "MQTT",
+	},
+	{
+		deviceId: 118,
+		deviceName: "666",
+		productId: 66,
+		productName: "999",
+		serialNumber: "D4AD203F3A1C",
+		activeTime: "2023-03-23",
+		createTime: "2025-02-28",
+		transport: "MQTT",
+	},
+	{
+		deviceId: 118,
+		deviceName: "666",
+		productId: 66,
+		productName: "999",
+		serialNumber: "D4AD203F3A1C",
+		activeTime: "2023-03-23",
+		createTime: "2025-02-28",
+		transport: "MQTT",
+	},
+	{
+		deviceId: 118,
+		deviceName: "666",
+		productId: 66,
+		productName: "999",
+		serialNumber: "D4AD203F3A1C",
+		activeTime: "2023-03-23",
+		createTime: "2025-02-28",
+		transport: "MQTT",
+	},
+	{
+		deviceId: 118,
+		deviceName: "666",
+		productId: 66,
+		productName: "999",
+		serialNumber: "D4AD203F3A1C",
+		activeTime: "2023-03-23",
+		createTime: "2025-02-28",
+		transport: "MQTT",
+	},
+])
+const loading = ref(false)
 
-const handleDelete = (index, row) => {
-	deleteIndex.value = index
-	openDeleteDialogo.value = true
-}
-
-const confirmDelete = () => {
-	openDeleteDialogo.value = false
-	const index = deleteIndex.value
-	if (index !== null && index >= 0 && index < tableData.length) {
-		tableData.splice(index, 1)
-	}
-
-	deleteIndex.value = null
-}
-
-const cancelDelete = () => {
-	openDeleteDialogo.value = false
-	deleteIndex.value = null
-}
-const onSubmit = () => {
-	Store.connectDevice(form)
-		.then((res) => {
-			Store.deviceList.push(form)
-			Store.deviceNum++
-		})
-		.catch((err) => {
-			console.log(err)
-		})
-}
-const addDevice = () => {
-	openAddDevForm.value = true
+const getList = () => {
+	return deviceList.value
 }
 </script>
 
 <style scoped>
-.container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
 .button-group {
 	margin-bottom: 20px;
 }

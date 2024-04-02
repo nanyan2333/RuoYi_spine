@@ -5,6 +5,7 @@ class MQTT {
     constructor(topic) {
         this.topic = topic;
         this.url = 'ws://124.71.78.224:8083/mqtt';
+        // this.url = 'ws://'+import.meta.env.env.VITE_APP_BASE_API+':8083/mqtt'
     }
 
     init() {

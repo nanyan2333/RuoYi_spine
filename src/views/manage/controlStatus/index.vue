@@ -16,6 +16,7 @@
 		</el-dialog>
 		<div>{{ data }}</div>
 	</div>
+	
 </template>
 
 <script setup name="Index">
