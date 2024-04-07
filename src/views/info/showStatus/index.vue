@@ -21,10 +21,10 @@
 						style="width: 150px" />
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" size="mini" @click="handleQuery"
+					<el-button type="primary" size="small" @click="handleQuery"
 						><el-icon><Search /></el-icon> 搜索</el-button
 					>
-					<el-button size="mini" @click="resetQuery"
+					<el-button size="small" @click="resetquery"
 						><el-icon><refresh /></el-icon>重置</el-button
 					>
 				</el-form-item>
@@ -32,8 +32,8 @@
 					<el-button
 						type="primary"
 						plain
-						size="mini"
-						@click="handleEditDevice(0)"
+						size="small"
+						@click="addFormVisuable = true"
 						><el-icon><plus /></el-icon>新增</el-button
 					>
 				</el-form-item>
@@ -48,7 +48,7 @@
 					:md="12"
 					:lg="8"
 					:xl="6"
-					v-for="(item, index) in deviceList"
+					v-for="(item, index) in Store.deviceList"
 					:key="index"
 					style="margin-bottom: 30px; text-align: center">
 					<el-card
@@ -57,10 +57,7 @@
 						class="card-item">
 						<el-row :gutter="10" justify="space-between">
 							<el-col :span="20" style="text-align: left">
-								<!-- <svg-icon icon-class="device" v-if="item.isOwner == 1" /> -->
 								<span style="margin: 0 5px">{{ item.deviceName }}</span>
-								<!-- <el-tag size="mini" type="info">Ver {{item.firmwareVersion}}</el-tag>-->
-								<!-- <el-text v-if="item.protocolCode" type="info" size="mini" style="font-size: 14px; color: #ccc">{{ item.protocolCode }}</el-text> -->
 							</el-col>
 						</el-row>
 						<el-row :gutter="10">
@@ -72,24 +69,17 @@
 										white-space: nowrap;
 									">
 									<span style="display: inline-block; margin: 0 10px">
-										<!-- <el-tag type="success" size="small" v-if="item.isShadow == 1">影子</el-tag>
-                    <el-tag type="info" size="small" v-else>影子</el-tag> -->
-										<el-tag
-											type="primary"
-											size="small"
-											v-if="item.protocolCode"
-											>{{ item.protocolCode }}</el-tag
-										>
+										<el-tag size="small" v-if="item.protocolCode">{{
+											item.protocolCode
+										}}</el-tag>
 									</span>
-									<el-tag type="primary" size="small" v-if="item.transport">{{
+									<el-tag size="small" v-if="item.transport">{{
 										item.transport
 									}}</el-tag>
-									<!-- <dict-tag :options="dict.type.iot_location_way" :value="item.locationWay" size="small" style="display:inline-block;" /> -->
-									<!-- <dict-tag :options="dict.type.iot_transport_type" :value="item.transport" size="small" style="display: inline-block" /> -->
 								</div>
 								<el-descriptions
 									:column="1"
-									size="mini"
+									:size="descriptionSize"
 									style="white-space: nowrap">
 									<el-descriptions-item label="编号">
 										{{ item.serialNumber }}
@@ -112,111 +102,118 @@
 							</el-col>
 						</el-row>
 						<el-button-group style="margin-top: 15px">
-							<el-button type="danger" size="mini" style="padding: 5px 10px"
+							<el-button type="danger" size="small" style="padding: 5px 10px"
 								>删除</el-button
 							>
-							<el-button type="primary" size="mini" style="padding: 5px 15px"
+							<el-button type="primary" size="small" style="padding: 5px 15px"
 								>查看</el-button
 							>
-							<el-button type="success" size="mini" style="padding: 5px 15px"
+							<el-button type="success" size="small" style="padding: 5px 15px"
 								>运行状态</el-button
 							>
 						</el-button-group>
 					</el-card>
 				</el-col>
 			</el-row>
-			<el-empty description="暂无数据，请添加设备" v-if="total == 0"></el-empty>
+			<el-empty
+				description="暂无数据，请添加设备"
+				v-if="Store.total == 0"></el-empty>
 		</el-card>
-		<div style="padding: 20px;">
-			<pagination
-			v-show="total > 0"
-			:total="total"
-			v-model:page="queryParams.pageNum"
-			v-model:limit="queryParams.pageSize"
-			@pagination="getList" />
+
+		<div style="padding: 20px">
+			<!-- <pagination
+				v-show="Store.total > 0"
+				:total="Store.total"
+				v-model:page="queryParams.pageNum"
+				v-model:limit="queryParams.pageSize"
+				@pagination="handlePage" /> -->
+			<el-pagination
+				v-model:current-page="pageParams.pageNum"
+				v-model:page-size="pageParams.pageSize"
+				:page-sizes="[9, 18, 27, 54]"
+				:small="small"
+				:disabled="disabled"
+				:background="background"
+				layout="total, sizes, prev, pager, next, jumper"
+				:total="Store.total"
+				@size-change="handleSizeChange"
+				@current-change="handleCurrentChange" />
 		</div>
 	</div>
 </template>
 
 <script setup>
 //test
-import { reactive, ref } from "vue"
+import { reactive, ref, toRef, watch } from "vue"
 import useDeviceStore from "@/store/modules/device.js"
-
+const descriptionSize = ref("small")
 const Store = useDeviceStore()
-const queryParams = reactive({
+const small = ref(false)
+const background = ref(false)
+const disabled = ref(false)
+const addFormVisuable = ref(false)
+const queryParams = ref({
 	deviceName: "",
 	serialNumber: "",
-	pageNum: 1,
-	pageSize: 10,
 })
-const total = ref(3)
-const deviceList = ref([
-	{
-		deviceId: 118,
-		deviceName: "666",
-		productId: 66,
-		productName: "999",
-		serialNumber: "D4AD203F3A1C",
-		activeTime: "2023-03-23",
-		createTime: "2025-02-28",
-		transport: "MQTT",
-	},
-	{
-		deviceId: 118,
-		deviceName: "666",
-		productId: 66,
-		productName: "999",
-		serialNumber: "D4AD203F3A1C",
-		activeTime: "2023-03-23",
-		createTime: "2025-02-28",
-		transport: "MQTT",
-	},
-	{
-		deviceId: 118,
-		deviceName: "666",
-		productId: 66,
-		productName: "999",
-		serialNumber: "D4AD203F3A1C",
-		activeTime: "2023-03-23",
-		createTime: "2025-02-28",
-		transport: "MQTT",
-	},
-	{
-		deviceId: 118,
-		deviceName: "666",
-		productId: 66,
-		productName: "999",
-		serialNumber: "D4AD203F3A1C",
-		activeTime: "2023-03-23",
-		createTime: "2025-02-28",
-		transport: "MQTT",
-	},
-	{
-		deviceId: 118,
-		deviceName: "666",
-		productId: 66,
-		productName: "999",
-		serialNumber: "D4AD203F3A1C",
-		activeTime: "2023-03-23",
-		createTime: "2025-02-28",
-		transport: "MQTT",
-	},
-	{
-		deviceId: 118,
-		deviceName: "666",
-		productId: 66,
-		productName: "999",
-		serialNumber: "D4AD203F3A1C",
-		activeTime: "2023-03-23",
-		createTime: "2025-02-28",
-		transport: "MQTT",
-	},
-])
+const pageParams = ref({
+	pageNum: 1,
+	pageSize: 9,
+})
+const deviceInfo = ref({
+	deviceId: 0,
+	deviceName: "",
+	productId: 0,
+	productName: "",
+	serialNumber: "",
+	activeTime: "",
+	createTime: "",
+	transport: "MQTT",
+})
+
 const loading = ref(false)
 
-const getList = () => {
-	return deviceList.value
+//搜索设备
+const handleQuery = (queryParams) => {
+	Store.searchDevice(queryParams).then((res) => {
+		Store.deviceList = res.rows
+		Store.total = res.total
+	})
+}
+Store.getDeviceList(pageParams.value).then((res) => {
+	Store.deviceList = res.rows
+	Store.total = res.total
+})
+//分页器响应函数
+//val代表新的值
+const handleSizeChange = (val) => {
+	pageParams.value = { pageNum: pageParams.value.pageNum, pageSize: val }
+}
+const handleCurrentChange = (val) => {
+	pageParams.value = { pageNum: val, pageSize: pageParams.value.pageSize }
+}
+//监听分页器参数变化
+watch(pageParams, (newPage, old) => {
+	Store.getDeviceList(newPage).then((res) => {
+		Store.deviceList = res.rows
+		Store.total = res.total
+	})
+})
+//重置按钮
+
+const resetquery = () => {
+  queryParams.value = {
+    deviceName: "",
+    serialNumber: "",
+  }
+	pageParams.value = {
+		pageNum: 1,
+    pageSize: 9,
+	}
+  Store.getDeviceList(pageParams.value).then((res) => {
+    Store.deviceList = res.rows
+    Store.total = res.total
+  })
 }
 </script>
 
