@@ -33,7 +33,7 @@
 						type="primary"
 						plain
 						size="small"
-						@click="addFormVisuable = true"
+						@click="dialogVisuable = true"
 						><el-icon><plus /></el-icon>新增</el-button
 					>
 				</el-form-item>
@@ -102,9 +102,10 @@
 							</el-col>
 						</el-row>
 						<el-button-group style="margin-top: 15px">
-							<el-button type="danger" size="small" style="padding: 5px 10px"
+							<el-button type="danger" size="small" style="padding: 5px 10px" @click="deleteDevice(item)"
 								>删除</el-button
 							>
+							//TODO 添加查看页面和运行状态页面
 							<el-button type="primary" size="small" style="padding: 5px 15px"
 								>查看</el-button
 							>
@@ -119,14 +120,10 @@
 				description="暂无数据，请添加设备"
 				v-if="Store.total == 0"></el-empty>
 		</el-card>
-
+		<addDeviceDialog
+			:dialog-visuable="dialogVisuable"
+			@control-dialog-show="(val) => (dialogVisuable = val)"></addDeviceDialog>
 		<div style="padding: 20px">
-			<!-- <pagination
-				v-show="Store.total > 0"
-				:total="Store.total"
-				v-model:page="queryParams.pageNum"
-				v-model:limit="queryParams.pageSize"
-				@pagination="handlePage" /> -->
 			<el-pagination
 				v-model:current-page="pageParams.pageNum"
 				v-model:page-size="pageParams.pageSize"
@@ -144,14 +141,15 @@
 
 <script setup>
 //test
-import { reactive, ref, toRef, watch } from "vue"
+import { ref, watch } from "vue"
 import useDeviceStore from "@/store/modules/device.js"
+import addDeviceDialog from "./addDeviceDialog.vue"
 const descriptionSize = ref("small")
 const Store = useDeviceStore()
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
-const addFormVisuable = ref(false)
+const dialogVisuable = ref(false)
 const queryParams = ref({
 	deviceName: "",
 	serialNumber: "",
@@ -173,6 +171,9 @@ const deviceInfo = ref({
 
 const loading = ref(false)
 
+const close = (val) => {
+	dialogVisuable.value = val
+}
 //搜索设备
 const handleQuery = (queryParams) => {
 	Store.searchDevice(queryParams).then((res) => {
@@ -202,18 +203,24 @@ watch(pageParams, (newPage, old) => {
 //重置按钮
 
 const resetquery = () => {
-  queryParams.value = {
-    deviceName: "",
-    serialNumber: "",
-  }
+	queryParams.value = {
+		deviceName: "",
+		serialNumber: "",
+	}
 	pageParams.value = {
 		pageNum: 1,
-    pageSize: 9,
+		pageSize: 9,
 	}
-  Store.getDeviceList(pageParams.value).then((res) => {
-    Store.deviceList = res.rows
-    Store.total = res.total
-  })
+	Store.getDeviceList(pageParams.value).then((res) => {
+		Store.deviceList = res.rows
+		Store.total = res.total
+	})
+}
+//TODO添加消息提示 
+const deleteDevice = (deviceInfo) => {
+	Store.deleteConnect(deviceInfo).then((res) => {
+		console.log(res)
+	})
 }
 </script>
 
