@@ -1,10 +1,6 @@
 <template>
-	<el-drawer
-		v-model="isShow"
-		title="运行状态"
-		direction="rtl"
-		:before-close="closeOperation">
-		<el-descriptions title="设备信息" border :column="1">
+	<el-dialog v-model="isShow" :before-close="closeOperation" width="500" title="设备信息">
+		<el-descriptions border :column="1">
 			<el-descriptions-item label="device-id">
 				{{ deviceInfo.deviceId }}
 			</el-descriptions-item>
@@ -24,39 +20,29 @@
 				{{ deviceInfo.activeTime }}
 			</el-descriptions-item>
 		</el-descriptions>
-	</el-drawer>
+	</el-dialog>
 </template>
 <script setup>
-import { useMqtt, unit8ArrayToString, unit8ArrayToJson } from "@/utils/mqtt.js"
-import { watch } from "vue"
-const isShow = ref(false)
+import { ref, toRefs, watch } from "vue"
+
 const props = defineProps({
-	drawerVisuable: {
+	infoDialogVisuable: {
 		type: Boolean,
 	},
 	deviceInfo: {
 		type: Object,
 	},
 })
-const { Mqtt } = useMqtt()
-const { drawerVisuable, deviceInfo } = toRefs(props)
-const mqttData = ref("null")
-
-const emit = defineEmits(["controlDrawerShow"])
-
+const isShow = ref(false)
+const { infoDialogVisuable, deviceInfo } = toRefs(props)
+const emit = defineEmits(["controlDevInfoIsShow"])
 const closeOperation = () => {
-	emit("controlDrawerShow", false)
+	emit("controlDevInfoIsShow", false)
 }
 watch(
-	() => drawerVisuable.value,
-	(newVal) => {
-		isShow.value = newVal
-	}
+	() => infoDialogVisuable.value,
+    (val) => {
+        isShow.value = val
+    }
 )
-const getSubscribe = () => {
-	Mqtt("device/" + deviceInfo.deviceid, (topic, payload, packet) => {
-		mqttData.value = unit8ArrayToJson(payload)
-	})
-}
-// getSubscribe()
 </script>

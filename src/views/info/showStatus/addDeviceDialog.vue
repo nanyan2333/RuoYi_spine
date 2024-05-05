@@ -51,7 +51,6 @@
 </template>
 
 <script setup>
-import mqtt from "@/utils/mqtt.js"
 import useDeviceStroe from "@/store/modules/device.js"
 import { toRefs, watch } from "vue"
 import { ElMessageBox, ElMessage } from "element-plus"

@@ -102,7 +102,10 @@
 								@click="deleteDevice(item)"
 								>删除</el-button
 							>
-							<el-button type="primary" style="padding: 5px 15px"
+							<el-button
+								type="primary"
+								style="padding: 5px 15px"
+								@click="openViewDevInfo(item)"
 								>查看</el-button
 							>
 							<el-button
@@ -128,12 +131,20 @@
 			"></addDeviceDialog>
 		<sliderDrawer
 			:drawer-visuable="drawerVisuable"
-			:device-info="drawerShowDeviceInfo"
+			:device-info="selectedDeviceInfo"
 			@control-drawer-show="
 				(val) => {
 					drawerVisuable = val
 				}
 			"></sliderDrawer>
+		<viewDevInfo
+			:info-dialog-visuable="infoDialogVisuable"
+			:device-info="selectedDeviceInfo"
+			@control-dev-info-is-show="
+				(val) => {
+					infoDialogVisuable = val
+				}
+			"></viewDevInfo>
 		<div style="padding: 20px">
 			<el-pagination
 				v-model:current-page="pageParams.pageNum"
@@ -156,6 +167,7 @@ import { ref, watch } from "vue"
 import useDeviceStore from "@/store/modules/device.js"
 import addDeviceDialog from "./addDeviceDialog.vue"
 import sliderDrawer from "./sliderDrawer.vue"
+import viewDevInfo from "./viewDevInfo.vue"
 const descriptionSize = ref("small")
 const Store = useDeviceStore()
 const small = ref(false)
@@ -163,7 +175,8 @@ const background = ref(false)
 const disabled = ref(false)
 const dialogVisuable = ref(false)
 const drawerVisuable = ref(false)
-const drawerShowDeviceInfo = ref()
+const infoDialogVisuable = ref(false)
+const selectedDeviceInfo = ref()
 const queryParams = ref({
 	deviceName: "",
 	serialNumber: "",
@@ -201,7 +214,11 @@ const handleQuery = () => {
 //打开侧边抽屉
 const openDrawer = (item) => {
 	drawerVisuable.value = true
-	drawerShowDeviceInfo.value = item
+	selectedDeviceInfo.value = item
+}
+const openViewDevInfo = (item) => {
+	infoDialogVisuable.value = true
+	selectedDeviceInfo.value = item
 }
 //分页器响应函数
 //val代表新的值
