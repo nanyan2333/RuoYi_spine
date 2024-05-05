@@ -1,5 +1,5 @@
 <template>
-	<el-dialog v-model="isShow" width="500" center title="新增设备">
+	<el-dialog v-model="dialogVisuable" width="500" center title="新增设备" :before-close="cancelOperation">
 		<el-form :model="deviceInfo" label-width="auto">
 			<el-form-item label="设备ID">
 				<el-input
@@ -74,16 +74,12 @@ const deviceInfo = ref({
 	transport: "MQTT",
 })
 const { dialogVisuable } = toRefs(props)
-const isShow = ref(false)
+
 const emit = defineEmits(["controlDialogShow"])
 
-watch(
-	() => dialogVisuable.value,
-	(newVal) => {
-		isShow.value = newVal
-	}
-)
-
+const cancelOperation = () => {
+	emit("controlDialogShow", false)
+}
 const addDevice = () => {
 	const now = new Date()
 	const year = now.getFullYear()
@@ -102,13 +98,9 @@ const addDevice = () => {
 				type: "success",
 				message: "新增设备成功",
 			})
-			cancelOperation()
 		}
+		cancelOperation()
 	})
-}
-
-const cancelOperation = () => {
-	emit("controlDialogShow", false)
 }
 
 const disableDate = (time) => {

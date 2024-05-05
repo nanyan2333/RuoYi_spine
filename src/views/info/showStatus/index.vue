@@ -21,19 +21,15 @@
 						style="width: 150px" />
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" size="small" @click="handleQuery"
+					<el-button type="primary" @click="handleQuery"
 						><el-icon><Search /></el-icon> 搜索</el-button
 					>
-					<el-button size="small" @click="resetquery"
-						><el-icon><refresh /></el-icon>重置</el-button
+					<el-button @click="resetquery"
+						><el-icon><refresh /></el-icon> 重置</el-button
 					>
 				</el-form-item>
 				<el-form-item style="float: right">
-					<el-button
-						type="primary"
-						plain
-						size="small"
-						@click="dialogVisuable = true"
+					<el-button type="primary" plain @click="dialogVisuable = true"
 						><el-icon><plus /></el-icon>新增</el-button
 					>
 				</el-form-item>
@@ -69,13 +65,11 @@
 										white-space: nowrap;
 									">
 									<span style="display: inline-block; margin: 0 10px">
-										<el-tag size="small" v-if="item.protocolCode">{{
+										<el-tag v-if="item.protocolCode">{{
 											item.protocolCode
 										}}</el-tag>
 									</span>
-									<el-tag size="small" v-if="item.transport">{{
-										item.transport
-									}}</el-tag>
+									<el-tag v-if="item.transport">{{ item.transport }}</el-tag>
 								</div>
 								<el-descriptions
 									:column="1"
@@ -102,14 +96,19 @@
 							</el-col>
 						</el-row>
 						<el-button-group style="margin-top: 15px">
-							<el-button type="danger" size="small" style="padding: 5px 10px" @click="deleteDevice(item)"
+							<el-button
+								type="danger"
+								style="padding: 5px 10px"
+								@click="deleteDevice(item)"
 								>删除</el-button
 							>
-							//TODO 添加查看页面和运行状态页面
-							<el-button type="primary" size="small" style="padding: 5px 15px"
+							<el-button type="primary" style="padding: 5px 15px"
 								>查看</el-button
 							>
-							<el-button type="success" size="small" style="padding: 5px 15px"
+							<el-button
+								type="success"
+								style="padding: 5px 15px"
+								@click="openDrawer(item)"
 								>运行状态</el-button
 							>
 						</el-button-group>
@@ -122,7 +121,19 @@
 		</el-card>
 		<addDeviceDialog
 			:dialog-visuable="dialogVisuable"
-			@control-dialog-show="(val) => (dialogVisuable = val)"></addDeviceDialog>
+			@control-dialog-show="
+				(val) => {
+					dialogVisuable = val
+				}
+			"></addDeviceDialog>
+		<sliderDrawer
+			:drawer-visuable="drawerVisuable"
+			:device-info="drawerShowDeviceInfo"
+			@control-drawer-show="
+				(val) => {
+					drawerVisuable = val
+				}
+			"></sliderDrawer>
 		<div style="padding: 20px">
 			<el-pagination
 				v-model:current-page="pageParams.pageNum"
@@ -144,12 +155,15 @@
 import { ref, watch } from "vue"
 import useDeviceStore from "@/store/modules/device.js"
 import addDeviceDialog from "./addDeviceDialog.vue"
+import sliderDrawer from "./sliderDrawer.vue"
 const descriptionSize = ref("small")
 const Store = useDeviceStore()
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
 const dialogVisuable = ref(false)
+const drawerVisuable = ref(false)
+const drawerShowDeviceInfo = ref()
 const queryParams = ref({
 	deviceName: "",
 	serialNumber: "",
@@ -171,20 +185,24 @@ const deviceInfo = ref({
 
 const loading = ref(false)
 
-const close = (val) => {
-	dialogVisuable.value = val
-}
-//搜索设备
-const handleQuery = (queryParams) => {
-	Store.searchDevice(queryParams).then((res) => {
+const loadList = () => {
+	Store.getDeviceList(pageParams.value).then((res) => {
 		Store.deviceList = res.rows
 		Store.total = res.total
 	})
 }
-Store.getDeviceList(pageParams.value).then((res) => {
-	Store.deviceList = res.rows
-	Store.total = res.total
-})
+//搜索设备
+const handleQuery = () => {
+	Store.searchDevice(queryParams.value).then((res) => {
+		Store.deviceList = res.rows
+		Store.total = res.total
+	})
+}
+//打开侧边抽屉
+const openDrawer = (item) => {
+	drawerVisuable.value = true
+	drawerShowDeviceInfo.value = item
+}
 //分页器响应函数
 //val代表新的值
 const handleSizeChange = (val) => {
@@ -211,17 +229,15 @@ const resetquery = () => {
 		pageNum: 1,
 		pageSize: 9,
 	}
-	Store.getDeviceList(pageParams.value).then((res) => {
-		Store.deviceList = res.rows
-		Store.total = res.total
-	})
+	loadList()
 }
-//TODO添加消息提示 
+//TODO添加消息提示
 const deleteDevice = (deviceInfo) => {
 	Store.deleteConnect(deviceInfo).then((res) => {
 		console.log(res)
 	})
 }
+loadList()
 </script>
 
 <style scoped>
