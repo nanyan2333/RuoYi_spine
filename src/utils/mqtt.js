@@ -55,40 +55,40 @@ class MQTT {
         this.client.end();
     }
 }
+export default {
+    useMqtt() {
+        const PublicMqtt = ref(null);
 
-export function useMqtt() {
-    const PublicMqtt = ref(null);
+        const startMqtt = (val, callback) => {
+            PublicMqtt.value = new MQTT(val);
+            PublicMqtt.value.init();
+            PublicMqtt.value.link();
+            getMessage(callback);
+        };
 
-    const startMqtt = (val, callback) => {
-        PublicMqtt.value = new MQTT(val);
-        PublicMqtt.value.init();
-        PublicMqtt.value.link();
-        getMessage(callback);
-    };
+        const getMessage = (callback) => {
+            PublicMqtt.value?.get(callback);
+        };
 
-    const getMessage = (callback) => {
-        PublicMqtt.value?.get(callback);
-    };
+        onUnmounted(() => {
+            if (PublicMqtt.value) {
+                PublicMqtt.value.unsubscribes();
+                PublicMqtt.value.over();
+            }
+        });
 
-    onUnmounted(() => {
-        if (PublicMqtt.value) {
-            PublicMqtt.value.unsubscribes();
-            PublicMqtt.value.over();
+        return {
+            startMqtt,
         }
-    });
-
-    return {
-        startMqtt,
-    };
-}
-export function unit8ArrayToString(array) {
-    let str = '';
-    for (let i = 0; i < array.length; i++) {
-        str += String.fromCharCode(array[i]);
+    },
+    unit8ArrayToString(array) {
+        let str = '';
+        for (let i = 0; i < array.length; i++) {
+            str += String.fromCharCode(array[i]);
+        }
+        return str;
+    },
+    unit8ArrayToJson(array) {
+        return JSON.parse(this.unit8ArrayToString(array))
     }
-    return str;
 }
-export function unit8ArrayToJson(array) {
-    return JSON.parse(this.unit8ArrayToString(array))
-}
-

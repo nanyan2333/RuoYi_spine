@@ -168,6 +168,7 @@ import useDeviceStore from "@/store/modules/device.js"
 import addDeviceDialog from "./addDeviceDialog.vue"
 import sliderDrawer from "./sliderDrawer.vue"
 import viewDevInfo from "./viewDevInfo.vue"
+import { ElMessage } from "element-plus"
 const descriptionSize = ref("small")
 const Store = useDeviceStore()
 const small = ref(false)
@@ -246,12 +247,29 @@ const resetquery = () => {
 		pageNum: 1,
 		pageSize: 9,
 	}
-	loadList()
+	loadList().then(() => {
+		ElMessage({
+			message: "重置成功",
+            type: "success",
+		})
+	})
 }
-//TODO添加消息提示
+//删除列表设备
 const deleteDevice = (deviceInfo) => {
 	Store.deleteConnect(deviceInfo).then((res) => {
-		console.log(res)
+		if(res.status == 200){
+			ElMessage({
+                message: "删除成功",
+                type: "success",
+            })
+            loadList()
+		}
+		else{
+			ElMessage({
+                message: "删除失败",
+                type: "error",
+            })
+		}
 	})
 }
 loadList()

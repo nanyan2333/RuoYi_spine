@@ -24,10 +24,27 @@
 				{{ deviceInfo.activeTime }}
 			</el-descriptions-item>
 		</el-descriptions>
+		<!-- <el-descriptions title="设备运行" border :column="1">
+			<el-descriptions-item label="buzzer">
+				{{ mqttData.properties.buzzer }}
+			</el-descriptions-item>
+			<el-descriptions-item label="fan">
+				{{ mqttData.properties.fan }}
+			</el-descriptions-item>
+			<el-descriptions-item label="led">
+				{{ mqttData.properties.led }}
+			</el-descriptions-item>
+			<el-descriptions-item label="humidity">
+				{{ mqttData.properties.humidity }}
+			</el-descriptions-item>
+			<el-descriptions-item label="temperature">
+				{{ mqttData.properties.temperature }}
+			</el-descriptions-item>
+		</el-descriptions> -->
 	</el-drawer>
 </template>
 <script setup>
-import { useMqtt, unit8ArrayToString, unit8ArrayToJson } from "@/utils/mqtt.js"
+import mqtt from "@/utils/mqtt.js"
 import { watch } from "vue"
 const isShow = ref(false)
 const props = defineProps({
@@ -38,7 +55,7 @@ const props = defineProps({
 		type: Object,
 	},
 })
-const { Mqtt } = useMqtt()
+const { startMqtt } = mqtt.useMqtt()
 const { drawerVisuable, deviceInfo } = toRefs(props)
 const mqttData = ref("null")
 
@@ -54,9 +71,12 @@ watch(
 	}
 )
 const getSubscribe = () => {
-	Mqtt("device/" + deviceInfo.deviceid, (topic, payload, packet) => {
-		mqttData.value = unit8ArrayToJson(payload)
+	startMqtt("device/" + deviceInfo.deviceid, (topic, payload, packet) => {
+		mqttData.value = mqtt.unit8ArrayToJson(payload)
 	})
 }
-// getSubscribe()
+// TODO test function
+// onMounted(() => {
+// 	getSubscribe()
+// })
 </script>
