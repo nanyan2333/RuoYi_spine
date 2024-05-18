@@ -24,7 +24,7 @@ const useDeviceStore = defineStore(
             addDevice(deviceInfo){
                 return request({
                     url:'/device/addConnect',
-                    method:'get',
+                    method:'post',
                     data:deviceInfo
                 })
             },
@@ -48,15 +48,15 @@ const useDeviceStore = defineStore(
                     }
                 })
             },
-            //deviceName: 
-	        //serialNumber: 设备名称和编号，不全为空
+            //productId: 
+	        //productName: 设备名称和编号，不全为空
             searchDevice:(queryParams) => {
                 return request({
                     url:'/device/searchDevice',
                     method:'get',
                     params:{
-                        deviceName:queryParams.deviceName,
-                        serialNumber:queryParams.serialNumber
+                        productId:queryParams.productId,
+                        productName:queryParams.productName
                     }
                 })
             }

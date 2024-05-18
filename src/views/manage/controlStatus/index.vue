@@ -20,31 +20,32 @@
 							</div>
 						</template>
 						<el-descriptions :column="1" border>
-							<el-descriptions-item label="i">
-								{{ src.sevice.device_id }}
-							</el-descriptions-item>
 							<el-descriptions-item label="i">{{
-								src.sevice.service_id
+								src.sevices.service_id
 							}}</el-descriptions-item>
 							<el-descriptions-item label="i">
-								{{ src.sevice.properties.buzzer }}
+								{{ src.sevices.properties.buzzer }}
 							</el-descriptions-item>
 							<el-descriptions-item label="i">
-								{{ src.sevice.properties.fan }}
+								{{ src.sevices.properties.fan }}
 							</el-descriptions-item>
 							<el-descriptions-item label="i">
-								{{ src.sevice.properties.distance }}
+								{{ src.sevices.properties.distance }}
 							</el-descriptions-item>
 							<el-descriptions-item label="i">
-								{{ src.sevice.properties.temperature }}
+								{{ src.sevices.properties.temperature }}
 							</el-descriptions-item>
 							<el-descriptions-item label="i">
-								{{ src.sevice.properties.infrared }}
+								{{ src.sevices.properties.infrared }}
 							</el-descriptions-item>
 							<el-descriptions-item label="i">
-								{{ src.sevice.properties.light }}
+								{{ src.sevices.properties.light }}
+							</el-descriptions-item>
+							<el-descriptions-item label="i">
+								{{ src.sevices.properties.distance }}
 							</el-descriptions-item>
 						</el-descriptions>
+						<span>{{ data }}</span>
 					</el-card>
 				</div>
 			</el-col>
@@ -75,12 +76,11 @@ const addSubscribeForm = ref({
 	topic: "",
 	disabled: true,
 })
-const headerIconName = ref('deviceStatus')
 const isEmpty = ref(true)
 const src = ref({
-	sevice: {
+	sevices: {
 		service_id: "1",
-		device_id: "5454_hi5544",
+		device_id: "2",
 		properties: {
 			buzzer: "off",
 			fan: "off",
@@ -94,11 +94,17 @@ const src = ref({
 	},
 })
 
+//    #product_id/service/#device_id
+//    #product_id/ping/#service_id
+// TODO product_id/device/+
+
 const subscribe = (addSubscribeForm) => {
 	console.log(addSubscribeForm)
 	if (addSubscribeForm.disabled) {
 		startMqtt(addSubscribeForm.topic, (topic, payload, packet) => {
+			// src.value = mqtt.unit8ArrayToJson(payload)
 			data.value = mqtt.unit8ArrayToString(payload)
+			console.log(data.value)
 		})
 	}
 	openAddSubscribeForm.value = false

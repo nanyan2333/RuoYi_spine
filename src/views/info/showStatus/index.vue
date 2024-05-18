@@ -6,16 +6,16 @@
 				:inline="true"
 				label-width="75px"
 				style="margin-bottom: -20px">
-				<el-form-item label="设备名称">
+				<el-form-item label="产品名称">
 					<el-input
-						v-model="queryParams.deviceName"
+						v-model="queryParams.productName"
 						placeholder="请输入设备名称"
 						clearable
 						style="width: 150px" />
 				</el-form-item>
-				<el-form-item label="设备编号">
+				<el-form-item label="产品编号">
 					<el-input
-						v-model="queryParams.serialNumber"
+						v-model="queryParams.productId"
 						placeholder="请输入设备编号"
 						clearable
 						style="width: 150px" />
@@ -179,22 +179,23 @@ const drawerVisuable = ref(false)
 const infoDialogVisuable = ref(false)
 const selectedDeviceInfo = ref()
 const queryParams = ref({
-	deviceName: "",
-	serialNumber: "",
+	productName:"",
+	productId:""
 })
 const pageParams = ref({
 	pageNum: 1,
 	pageSize: 9,
 })
-const deviceInfo = ref({
-	deviceId: 0,
-	deviceName: "",
-	productId: 0,
-	productName: "",
-	serialNumber: "",
-	activeTime: "",
-	createTime: "",
-	transport: "MQTT",
+const chairInfo = ref({
+	deviceId: "",//开发板的ID编号
+	deviceName: "",//开发板的设备名
+	productId: "",//*产品（椅子）的编号
+	productName: "",//*产品名
+	serialNumber: "",//*产品序列号
+	activeTime: "",//*产品激活时间
+	createTime: "",//*创建时间
+	transport: "MQTT",//*传输协议
+	//带*号的都是必填项，开发板的不为空就说明是开发板
 })
 
 const loading = ref(false)
@@ -207,6 +208,7 @@ const loadList = () => {
 }
 //搜索设备
 const handleQuery = () => {
+	console.log(queryParams.value)
 	Store.searchDevice(queryParams.value).then((res) => {
 		Store.deviceList = res.rows
 		Store.total = res.total

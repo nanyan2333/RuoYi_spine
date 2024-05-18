@@ -70,6 +70,8 @@ watch(
 		isShow.value = newVal
 	}
 )
+
+// TODO: 调试mqtt
 const getSubscribe = () => {
 	startMqtt("device/" + deviceInfo.deviceid, (topic, payload, packet) => {
 		mqttData.value = mqtt.unit8ArrayToJson(payload)
