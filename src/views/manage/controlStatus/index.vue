@@ -7,7 +7,9 @@
 						<el-button @click="openAddSubscribeForm = true">新增订阅</el-button>
 					</el-empty>
 					<!--  TODO 3d椅子组件 -->
-					<div v-else></div>
+					<div v-else>
+						<span>this is a chair</span>
+					</div>
 				</div>
 			</el-col>
 			<el-col :span="8">
@@ -19,31 +21,31 @@
 								<el-text size="large">设备状态</el-text>
 							</div>
 						</template>
-						<el-descriptions :column="1" border>
-							<el-descriptions-item label="i">{{
-								src.sevices.service_id
+						<el-descriptions :column="1" border v-if="src">
+							<el-descriptions-item label="开发板ID">{{
+								src.sevices.device_id
 							}}</el-descriptions-item>
-							<el-descriptions-item label="i">
+							<el-descriptions-item label="buzzer">
 								{{ src.sevices.properties.buzzer }}
 							</el-descriptions-item>
-							<el-descriptions-item label="i">
+							<el-descriptions-item label="fan">
 								{{ src.sevices.properties.fan }}
 							</el-descriptions-item>
-							<el-descriptions-item label="i">
+							<el-descriptions-item label="distance">
 								{{ src.sevices.properties.distance }}
 							</el-descriptions-item>
-							<el-descriptions-item label="i">
+							<el-descriptions-item label="temperature">
 								{{ src.sevices.properties.temperature }}
 							</el-descriptions-item>
-							<el-descriptions-item label="i">
+							<el-descriptions-item label="infrared">
 								{{ src.sevices.properties.infrared }}
 							</el-descriptions-item>
-							<el-descriptions-item label="i">
+							<el-descriptions-item label="light">
 								{{ src.sevices.properties.light }}
 							</el-descriptions-item>
-							<el-descriptions-item label="i">
-								{{ src.sevices.properties.distance }}
-							</el-descriptions-item>
+						    <el-descriptions-item label="humidity">
+                                {{ src.sevices.properties.humidity }}
+                            </el-descriptions-item>
 						</el-descriptions>
 						<span>{{ data }}</span>
 					</el-card>
@@ -52,13 +54,13 @@
 		</el-row>
 		<el-dialog title="新增订阅" v-model="openAddSubscribeForm">
 			<el-form :model="addSubscribeForm" label-width="100px">
-				<el-form-item label="订阅名称" prop="name">
+				<el-form-item label="productId">
 					<el-input v-model="addSubscribeForm.topic"></el-input>
 				</el-form-item>
 			</el-form>
 			<template #footer>
 				<div>
-					<el-button @click="subscribe(addSubscribeForm)"> 订阅 </el-button>
+					<el-button @click="subscribe(addSubscribeForm)" size="large"> 订阅 </el-button>
 				</div>
 			</template>
 		</el-dialog>
@@ -77,22 +79,24 @@ const addSubscribeForm = ref({
 	disabled: true,
 })
 const isEmpty = ref(true)
-const src = ref({
-	sevices: {
-		service_id: "1",
-		device_id: "2",
-		properties: {
-			buzzer: "off",
-			fan: "off",
-			humidity: "off",
-			temperature: 28,
-			light: 134,
-			proximity: 184,
-			infrared: 23,
-			distance: 1067,
-		},
-	},
-})
+const src = ref(
+// {
+// 	sevices: {
+// 		service_id: "1",
+// 		device_id: "2",
+// 		properties: {
+// 			buzzer: "off",
+// 			fan: "off",
+// 			humidity: "off",
+// 			temperature: 28,
+// 			light: 134,
+// 			proximity: 184,
+// 			infrared: 23,
+// 			distance: 1067,
+// 		},
+// 	},
+// }
+)
 
 //    #product_id/service/#device_id
 //    #product_id/ping/#service_id
@@ -102,9 +106,10 @@ const subscribe = (addSubscribeForm) => {
 	console.log(addSubscribeForm)
 	if (addSubscribeForm.disabled) {
 		startMqtt(addSubscribeForm.topic, (topic, payload, packet) => {
-			// src.value = mqtt.unit8ArrayToJson(payload)
+			src.value = mqtt.unit8ArrayToJson(payload)
 			data.value = mqtt.unit8ArrayToString(payload)
 			console.log(data.value)
+			isEmpty = false
 		})
 	}
 	openAddSubscribeForm.value = false

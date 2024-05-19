@@ -88,10 +88,10 @@
 							</el-col>
 							<el-col :span="7">
 								<div style="margin-top: 10px">
-									<img
-										src="@/assets/images/product.png"
-										alt="未加载"
-										style="width: 120px; height: auto" />
+									<spine-svg
+										icon-name="product"
+										icon-fromat=".png"
+										icon-width="120"></spine-svg>
 								</div>
 							</el-col>
 						</el-row>
@@ -167,6 +167,7 @@ import { ref, watch } from "vue"
 import useDeviceStore from "@/store/modules/device.js"
 import addDeviceDialog from "./addDeviceDialog.vue"
 import sliderDrawer from "./sliderDrawer.vue"
+import SpineSvg from "@/components/SpineSvg/svgicon.vue"
 import viewDevInfo from "./viewDevInfo.vue"
 import { ElMessage } from "element-plus"
 const descriptionSize = ref("small")
@@ -179,22 +180,22 @@ const drawerVisuable = ref(false)
 const infoDialogVisuable = ref(false)
 const selectedDeviceInfo = ref()
 const queryParams = ref({
-	productName:"",
-	productId:""
+	productName: "",
+	productId: "",
 })
 const pageParams = ref({
 	pageNum: 1,
 	pageSize: 9,
 })
 const chairInfo = ref({
-	deviceId: "",//开发板的ID编号
-	deviceName: "",//开发板的设备名
-	productId: "",//*产品（椅子）的编号
-	productName: "",//*产品名
-	serialNumber: "",//*产品序列号
-	activeTime: "",//*产品激活时间
-	createTime: "",//*创建时间
-	transport: "MQTT",//*传输协议
+	deviceId: "", //开发板的ID编号
+	deviceName: "", //开发板的设备名
+	productId: "", //*产品（椅子）的编号
+	productName: "", //*产品名
+	serialNumber: "", //*产品序列号
+	activeTime: "", //*产品激活时间
+	createTime: "", //*创建时间
+	transport: "MQTT", //*传输协议
 	//带*号的都是必填项，开发板的不为空就说明是开发板
 })
 
@@ -252,26 +253,26 @@ const resetquery = () => {
 	loadList().then(() => {
 		ElMessage({
 			message: "重置成功",
-            type: "success",
+			type: "success",
 		})
 	})
 }
 //删除列表设备
 const deleteDevice = (deviceInfo) => {
 	Store.deleteConnect(deviceInfo).then((res) => {
-		if(res.status == 200){
+		if (res.status == 200) {
 			ElMessage({
-                message: "删除成功",
-                type: "success",
-            })
-            loadList()
-		}
-		else{
+				message: "删除成功",
+				type: "success",
+			})
+			loadList()
+		} else {
 			ElMessage({
-                message: "删除失败",
-                type: "error",
-            })
+				message: "删除失败",
+				type: "error",
+			})
 		}
+		loadList()
 	})
 }
 loadList()

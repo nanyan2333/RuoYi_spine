@@ -39,7 +39,7 @@ class MQTT {
         this.client.on('connect', () => {
             this.client.subscribe(this.topic, (error) => {
                 if (!error) {
-                    console.log('订阅成功');
+                    console.log(this.topic + '订阅成功');
                 } else {
                     console.log('订阅失败');
                 }
@@ -69,7 +69,13 @@ export default {
         const getMessage = (callback) => {
             PublicMqtt.value?.get(callback);
         };
-
+        const closeMqtt = (callback) => {
+            PublicMqtt.value?.unsubscribes();
+            PublicMqtt.value?.over();
+            if (callback) {
+                callback();
+            }
+        }
         onUnmounted(() => {
             if (PublicMqtt.value) {
                 PublicMqtt.value.unsubscribes();
@@ -77,8 +83,10 @@ export default {
             }
         });
 
+
+
         return {
-            startMqtt,
+            startMqtt, closeMqtt
         }
     },
     unit8ArrayToString(array) {
@@ -90,5 +98,8 @@ export default {
     },
     unit8ArrayToJson(array) {
         return JSON.parse(this.unit8ArrayToString(array))
+    },
+    transformTopic(productId, service, deviceId = "+") {
+        return `${productId}/${service}/${deviceId}`
     }
 }

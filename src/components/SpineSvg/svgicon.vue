@@ -25,8 +25,8 @@ const props = defineProps({
 		default: ".svg",
 	},
 	iconWidth: {
-		type: Number,
-		default: 40,
+		type: String,
+		default: '40',
 	},
 })
 const { iconName, iconStyle, iconAlt, iconFromat, iconWidth } = toRefs(props)

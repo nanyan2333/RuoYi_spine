@@ -24,23 +24,23 @@
 				{{ deviceInfo.activeTime }}
 			</el-descriptions-item>
 		</el-descriptions>
-		<!-- <el-descriptions title="设备运行" border :column="1">
+		<el-descriptions title="硬件状态" border :column="1" v-if="mqttData">
 			<el-descriptions-item label="buzzer">
-				{{ mqttData.properties.buzzer }}
+				{{ mqttData.sevices.properties.buzzer }}
 			</el-descriptions-item>
 			<el-descriptions-item label="fan">
-				{{ mqttData.properties.fan }}
+				{{ mqttData.sevices.properties.fan }}
 			</el-descriptions-item>
 			<el-descriptions-item label="led">
-				{{ mqttData.properties.led }}
+				{{ mqttData.sevices.properties.led }}
 			</el-descriptions-item>
 			<el-descriptions-item label="humidity">
-				{{ mqttData.properties.humidity }}
+				{{ mqttData.sevices.properties.humidity }}
 			</el-descriptions-item>
 			<el-descriptions-item label="temperature">
-				{{ mqttData.properties.temperature }}
+				{{ mqttData.sevices.properties.temperature }}
 			</el-descriptions-item>
-		</el-descriptions> -->
+		</el-descriptions>
 	</el-drawer>
 </template>
 <script setup>
@@ -55,9 +55,9 @@ const props = defineProps({
 		type: Object,
 	},
 })
-const { startMqtt } = mqtt.useMqtt()
+const { startMqtt,closeMqtt } = mqtt.useMqtt()
 const { drawerVisuable, deviceInfo } = toRefs(props)
-const mqttData = ref("null")
+const mqttData = ref(null)
 
 const emit = defineEmits(["controlDrawerShow"])
 
@@ -73,12 +73,12 @@ watch(
 
 // TODO: 调试mqtt
 const getSubscribe = () => {
-	startMqtt("device/" + deviceInfo.deviceid, (topic, payload, packet) => {
+	startMqtt(mqtt.transformTopic(deviceInfo.productId,"service0"), (topic, payload, packet) => {
 		mqttData.value = mqtt.unit8ArrayToJson(payload)
 	})
 }
 // TODO test function
-// onMounted(() => {
-// 	getSubscribe()
-// })
+onMounted(() => {
+	getSubscribe()
+})
 </script>
