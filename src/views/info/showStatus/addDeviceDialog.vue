@@ -116,17 +116,6 @@ const addDevice = () => {
 	deviceInfo.value.createTime = formattedTime
 	formDom.value.validate((valid) => {
 		if (valid) {
-			// let flag = false
-			// startMqtt(
-			// 	mqtt.transformTopic(deviceInfo.value.productId, "service1"),
-			// 	(topic, payload, packet) => {
-			// 		flag = true
-			// 		closeMqtt(()=>{
-			// 			console.log("close mqtt")
-			// 		})
-			// 	}
-			// )
-			// setTimeout(() => {}, 500)
 			Store.addDevice(deviceInfo.value).then((res) => {
 				ElMessage({
 					type: "success",
@@ -137,9 +126,9 @@ const addDevice = () => {
 		} else {
 			resetForm()
 			ElMessage({
-                type: "error",
-                message: "新增设备失败",
-            })
+				type: "error",
+				message: "新增设备失败",
+			})
 		}
 	})
 }

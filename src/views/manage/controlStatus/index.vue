@@ -1,10 +1,25 @@
 <template>
 	<div>
+		<el-card style="margin-bottom: 6px">
+			<el-form :inline="true">
+				<el-form-item style="float: right">
+					<el-button @click="openAddSubscribeForm = true" size="large"
+						><el-icon><plus /></el-icon>新增订阅</el-button
+					>
+					<el-button @click="reset" size="large"
+						><el-icon><refresh /></el-icon> 重置</el-button
+					>
+				</el-form-item>
+				<el-form-item style="float: right"></el-form-item>
+			</el-form>
+		</el-card>
 		<el-row :gutter="20">
 			<el-col :span="16">
 				<div class="chair-container">
 					<el-empty description="请先请阅设备" v-if="isEmpty">
-						<el-button @click="openAddSubscribeForm = true">新增订阅</el-button>
+						<el-button @click="openAddSubscribeForm = true"
+							><el-icon><plus /></el-icon>新增订阅</el-button
+						>
 					</el-empty>
 					<!--  TODO 3d椅子组件 -->
 					<div v-else>
@@ -17,37 +32,27 @@
 					<el-card>
 						<template #header>
 							<div class="header-container">
-								<spine-svg icon-name="deviceStatus"></spine-svg>
+								<img
+									src="@/assets/icons/svg/deviceStatus.svg"
+									alt=""
+									style="width: 40px; height: auto" />
 								<el-text size="large">设备状态</el-text>
 							</div>
 						</template>
-						<el-descriptions :column="1" border v-if="src">
-							<el-descriptions-item label="开发板ID">{{
-								src.sevices.device_id
-							}}</el-descriptions-item>
-							<el-descriptions-item label="buzzer">
-								{{ src.sevices.properties.buzzer }}
-							</el-descriptions-item>
-							<el-descriptions-item label="fan">
-								{{ src.sevices.properties.fan }}
+						<el-descriptions
+							:column="1"
+							border
+							v-if="deviceMessageDict"
+							v-for="(message, deviceId) in deviceMessageDict"
+							:key="deviceId">
+							<el-descriptions-item label="id">
+								{{ message.device_id }}
 							</el-descriptions-item>
 							<el-descriptions-item label="distance">
-								{{ src.sevices.properties.distance }}
+								{{ message.distance }}
 							</el-descriptions-item>
-							<el-descriptions-item label="temperature">
-								{{ src.sevices.properties.temperature }}
-							</el-descriptions-item>
-							<el-descriptions-item label="infrared">
-								{{ src.sevices.properties.infrared }}
-							</el-descriptions-item>
-							<el-descriptions-item label="light">
-								{{ src.sevices.properties.light }}
-							</el-descriptions-item>
-						    <el-descriptions-item label="humidity">
-                                {{ src.sevices.properties.humidity }}
-                            </el-descriptions-item>
 						</el-descriptions>
-						<span>{{ data }}</span>
+						<el-empty description="请先请阅设备" v-else> </el-empty>
 					</el-card>
 				</div>
 			</el-col>
@@ -60,7 +65,9 @@
 			</el-form>
 			<template #footer>
 				<div>
-					<el-button @click="subscribe(addSubscribeForm)" size="large"> 订阅 </el-button>
+					<el-button @click="subscribe(addSubscribeForm)" size="large">
+						订阅
+					</el-button>
 				</div>
 			</template>
 		</el-dialog>
@@ -69,50 +76,55 @@
 
 <script setup>
 import mqtt from "@/utils/mqtt"
-import { reactive, ref } from "vue"
-import SpineSvg from '@/components/SpineSvg/svgicon.vue';
+import { reactive, ref, watch } from "vue"
+import api from "@/api/manage/log.js"
 const openAddSubscribeForm = ref(false)
-const { startMqtt } = mqtt.useMqtt()
-const data = ref("null")
+const { startMqtt, closeMqtt } = mqtt.useMqtt()
 const addSubscribeForm = ref({
 	topic: "",
 	disabled: true,
 })
 const isEmpty = ref(true)
-const src = ref(
-// {
-// 	sevices: {
-// 		service_id: "1",
-// 		device_id: "2",
-// 		properties: {
-// 			buzzer: "off",
-// 			fan: "off",
-// 			humidity: "off",
-// 			temperature: 28,
-// 			light: 134,
-// 			proximity: 184,
-// 			infrared: 23,
-// 			distance: 1067,
-// 		},
-// 	},
-// }
+
+//     {
+//			"device_id": 1,
+//     		"distance": 100,
+//			...
+//		}
+const { updateLog } = api
+watch(
+	() => deviceMessageDict.value,
+	(newVal) => {
+		updateLog(newVal)
+	}
 )
 
 //    #product_id/service/#device_id
 //    #product_id/ping/#service_id
-// TODO product_id/device/+
-
+//  product_id/device/+
+const deviceMessageDict = ref({})
 const subscribe = (addSubscribeForm) => {
+	// TODO 处理信息，传入的是productID，需要拓展
 	console.log(addSubscribeForm)
 	if (addSubscribeForm.disabled) {
-		startMqtt(addSubscribeForm.topic, (topic, payload, packet) => {
-			src.value = mqtt.unit8ArrayToJson(payload)
-			data.value = mqtt.unit8ArrayToString(payload)
-			console.log(data.value)
-			isEmpty = false
-		})
+		startMqtt(
+			mqtt.transformTopic(addSubscribeForm.topic, "service1"),
+			(topic, payload, packet) => {
+				let devId = topic.split("/")[2]
+				deviceMessageDict.value[devId] = mqtt.unit8ArrayToJson(payload)
+				isEmpty.value = false
+			}
+		)
 	}
 	openAddSubscribeForm.value = false
+}
+
+const reset = () => {
+	closeMqtt(() => {
+		console.log("close")
+	})
+	deviceMessageDict.value = {}
+	isEmpty.value = true
 }
 </script>
 
@@ -127,11 +139,8 @@ const subscribe = (addSubscribeForm) => {
 	align-items: center;
 }
 .header-container {
-  display: flex;
-  align-items: center;
+	display: flex;
+	align-items: center;
 	gap: 10px;
 }
-
-
-
 </style>

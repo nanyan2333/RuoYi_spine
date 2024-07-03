@@ -88,10 +88,14 @@
 							</el-col>
 							<el-col :span="7">
 								<div style="margin-top: 10px">
-									<spine-svg
+									<!-- <spine-svg
 										icon-name="product"
 										icon-fromat=".png"
-										icon-width="120"></spine-svg>
+										icon-width="120"></spine-svg> -->
+									<img
+										src="@/assets/images/product.png"
+										alt=""
+										style="width: 120px; height: auto" />
 								</div>
 							</el-col>
 						</el-row>
@@ -124,11 +128,7 @@
 		</el-card>
 		<addDeviceDialog
 			:dialog-visuable="dialogVisuable"
-			@control-dialog-show="
-				(val) => {
-					dialogVisuable = val
-				}
-			"></addDeviceDialog>
+			@control-dialog-show="closeDialog(val)"></addDeviceDialog>
 		<sliderDrawer
 			:drawer-visuable="drawerVisuable"
 			:device-info="selectedDeviceInfo"
@@ -260,20 +260,21 @@ const resetquery = () => {
 //删除列表设备
 const deleteDevice = (deviceInfo) => {
 	Store.deleteConnect(deviceInfo).then((res) => {
-		if (res.status == 200) {
-			ElMessage({
-				message: "删除成功",
-				type: "success",
-			})
-			loadList()
-		} else {
-			ElMessage({
-				message: "删除失败",
-				type: "error",
-			})
-		}
+		ElMessage({
+			message: "删除成功",
+			type: "success",
+		})
 		loadList()
 	})
+}
+// 关闭新增设备对话框后
+const closeDialog = (val) => {
+	dialogVisuable.value = val
+	loadList()
+}
+// 关闭侧边抽屉
+const closeDrawer = () => {
+	drawerVisuable.value = false
 }
 loadList()
 </script>

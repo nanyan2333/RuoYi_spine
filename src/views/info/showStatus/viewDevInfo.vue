@@ -1,10 +1,14 @@
 <template>
-	<el-dialog v-model="isShow" :before-close="closeOperation" width="500" title="设备信息">
+	<el-dialog
+		v-model="isShow"
+		:before-close="closeOperation"
+		width="500"
+		title="设备信息">
 		<el-descriptions border :column="1">
-			<el-descriptions-item label="device-id">
+			<el-descriptions-item label="device-id" v-if="deviceInfo.deviceId">
 				{{ deviceInfo.deviceId }}
 			</el-descriptions-item>
-			<el-descriptions-item label="device-name">
+			<el-descriptions-item label="device-name" v-if="deviceInfo.deviceName">
 				{{ deviceInfo.deviceName }}
 			</el-descriptions-item>
 			<el-descriptions-item label="product-id">
@@ -41,8 +45,8 @@ const closeOperation = () => {
 }
 watch(
 	() => infoDialogVisuable.value,
-    (val) => {
-        isShow.value = val
-    }
+	(val) => {
+		isShow.value = val
+	}
 )
 </script>

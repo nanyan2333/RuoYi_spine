@@ -3,12 +3,14 @@
 		v-model="isShow"
 		title="运行状态"
 		direction="rtl"
+		@open="getSubscribe"
 		:before-close="closeOperation">
+		<el-button @click="getSubscribe">订阅</el-button>
 		<el-descriptions title="设备信息" border :column="1">
-			<el-descriptions-item label="device-id">
+			<el-descriptions-item label="device-id" v-if="deviceInfo.deviceId">
 				{{ deviceInfo.deviceId }}
 			</el-descriptions-item>
-			<el-descriptions-item label="device-name">
+			<el-descriptions-item label="device-name" v-if="deviceInfo.deviceName">
 				{{ deviceInfo.deviceName }}
 			</el-descriptions-item>
 			<el-descriptions-item label="product-id">
@@ -24,21 +26,18 @@
 				{{ deviceInfo.activeTime }}
 			</el-descriptions-item>
 		</el-descriptions>
-		<el-descriptions title="硬件状态" border :column="1" v-if="mqttData">
-			<el-descriptions-item label="buzzer">
-				{{ mqttData.sevices.properties.buzzer }}
-			</el-descriptions-item>
-			<el-descriptions-item label="fan">
-				{{ mqttData.sevices.properties.fan }}
-			</el-descriptions-item>
-			<el-descriptions-item label="led">
-				{{ mqttData.sevices.properties.led }}
-			</el-descriptions-item>
-			<el-descriptions-item label="humidity">
-				{{ mqttData.sevices.properties.humidity }}
-			</el-descriptions-item>
-			<el-descriptions-item label="temperature">
-				{{ mqttData.sevices.properties.temperature }}
+		<el-descriptions
+			:title="key"
+			border
+			:column="1"
+			v-if="deviceIdList"
+			v-for="(message, key) in deviceIdList"
+			:key="key">
+			<el-descriptions-item
+				v-for="(value, property) in message"
+				:label="property"
+				:key="property">
+				{{ value }}
 			</el-descriptions-item>
 		</el-descriptions>
 	</el-drawer>
@@ -55,13 +54,15 @@ const props = defineProps({
 		type: Object,
 	},
 })
-const { startMqtt,closeMqtt } = mqtt.useMqtt()
+const deviceIdList = ref({})
+const { startMqtt, closeMqtt } = mqtt.useMqtt()
 const { drawerVisuable, deviceInfo } = toRefs(props)
 const mqttData = ref(null)
 
 const emit = defineEmits(["controlDrawerShow"])
 
 const closeOperation = () => {
+	closeMqtt(() => {})
 	emit("controlDrawerShow", false)
 }
 watch(
@@ -73,12 +74,22 @@ watch(
 
 // TODO: 调试mqtt
 const getSubscribe = () => {
-	startMqtt(mqtt.transformTopic(deviceInfo.productId,"service0"), (topic, payload, packet) => {
-		mqttData.value = mqtt.unit8ArrayToJson(payload)
-	})
+	startMqtt(
+		mqtt.transformTopic(deviceInfo.value.productId, "service1"),
+		(topic, payload, packet) => {
+			let value = mqtt.unit8ArrayToJson(payload)
+			let topicParts = topic.split("/")
+			let deviceId = topicParts[topicParts.length - 1]
+			if (deviceId in deviceIdList) {
+				deviceIdList.value[deviceId] = value
+			} else {
+				deviceIdList.value = {
+					...deviceIdList.value,
+					[deviceId]: value,
+				}
+			}
+		}
+	)
 }
 // TODO test function
-onMounted(() => {
-	getSubscribe()
-})
 </script>
