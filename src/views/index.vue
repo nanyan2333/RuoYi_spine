@@ -1,6 +1,7 @@
 <template>
 	<div class="layout_index">
 		<div class="carousel">
+			<!-- 走马灯轮播图 -->
 			<el-carousel height="562.5px">
 				<el-carousel-item v-for="(item, index) in img_list" :key="index">
 					<el-image :src="item" fit="fill"></el-image>
