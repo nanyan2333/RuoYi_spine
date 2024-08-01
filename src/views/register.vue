@@ -43,7 +43,7 @@
       </el-form-item>
       <el-form-item prop="age">
         <el-input
-          v-model="registerForm.age"
+          v-model.number="registerForm.age"
           type="number"
           size="large"
           auto-complete="off"
