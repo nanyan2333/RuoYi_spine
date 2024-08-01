@@ -4,34 +4,30 @@ export default {
         detectsOn: "canvas",
         events: {
             onClick: {
-                // 开启鼠标点击的效果
                 enable: true,
                 mode: "push",
             },
             onHover: {
-                // 开启鼠标悬浮的效果(线条跟着鼠标移动)
                 enable: true,
                 mode: "grab",
             },
             resize: true,
         },
         modes: {
-            // 配置动画效果
             bubble: {
-                distance: 400,
+                distance: 300,
                 duration: 2,
                 opacity: 0.8,
-                size: 40,
+                size: 6,
             },
             push: {
                 quantity: 4,
             },
             grab: {
-                distance: 200,
+                distance: 140,
                 duration: 0.4,
             },
             attract: {
-                // 鼠标悬浮时，集中于一点，鼠标移开时释放产生涟漪效果
                 distance: 200,
                 duration: 0.4,
                 factor: 5,
@@ -40,14 +36,14 @@ export default {
     },
     particles: {
         color: {
-            value: ["#BA55D3", "#FFD700", "#00FFFF", "#FF6347", "#7FFF00"], // 粒子点的颜色
+            value: ["#8A2BE2", "#4169E1", "#20B2AA", "#00CED1", "#4682B4"], // 更加优雅沉稳的颜色
         },
         links: {
-            color: "#FFBBFF", // 线条颜色
-            distance: 150, //线条距离
+            color: "#1E90FF", // 线条颜色，更加优雅
+            distance: 120, // 线条距离
             enable: true,
-            opacity: 0.6, // 不透明度
-            width: 2.5, // 线条宽度
+            opacity: 0.5, // 不透明度
+            width: 1.5, // 线条宽度
         },
         collisions: {
             enable: true,
@@ -59,7 +55,7 @@ export default {
             enable: true,
             out_mode: "out",
             random: false,
-            speed: 0.5, // 移动速度
+            speed: 0.8, // 移动速度，略快一些
             straight: false,
         },
         number: {
@@ -67,20 +63,17 @@ export default {
                 enable: true,
                 value_area: 800,
             },
-            value: 200, //粒子数
+            value: 120, // 粒子数量，略少一些以减少视觉噪音
         },
         opacity: {
-            //粒子透明度
-            value: 0.6,
+            value: 0.7, // 粒子透明度
         },
         shape: {
-            //粒子样式
-            type: ["star","circle","triangle"],
+            type: ["circle"], // 粒子形状，使用单一的圆形以保持简洁
         },
         size: {
-            //粒子大小
             random: true,
-            value: 4,
+            value: 3, // 粒子大小，略小一些
         },
     },
     detectRetina: true

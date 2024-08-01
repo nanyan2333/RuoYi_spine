@@ -4,7 +4,7 @@
 			<!-- 走马灯轮播图 -->
 			<el-carousel height="562.5px">
 				<el-carousel-item v-for="(item, index) in img_list" :key="index">
-					<el-image :src="item" fit="fill"></el-image>
+					<el-image :src="item" fit="cover" class="carousel-image"></el-image>
 				</el-carousel-item>
 			</el-carousel>
 
@@ -92,17 +92,31 @@ var res = ref("")
 <style scoped lang="scss">
 .layout_index {
 	display: flex;
-	justify-content: space-between;
-	margin: 30px 60px;
+	justify-content: space-around;
+	// margin: 30px 60px;
+	margin: 0px 0px;
+	background-image: url("../assets/images/indexBackGround2.webp");
+    background-size: cover; /* 背景图片覆盖整个容器 */
+    background-repeat: repeat; /* 背景图片重复 */
+    background-position: center; /* 背景图片居中 */
 }
 .carousel {
+	margin-top: 20px;
 	width: 900px;
 	height: fit-content;
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
 }
+.carousel-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* 确保图片覆盖整个容器 */
+	max-height: 720px; /* 设置图片的最大宽度 */
+	margin: 0 auto; /* 图片居中 */
+}
 .timeline {
+	margin-top: 20px;
 	width: 400px;
 	height: fit-content;
 	display: flex;

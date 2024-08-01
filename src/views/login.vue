@@ -1,11 +1,13 @@
 <template>
 	<div class="login">
+		<!--
 		<Particles
 			id="tsparticles"
 			class="login__particles"
 			:particlesInit="particlesInit"
 			:particlesLoaded="particlesLoaded"
 			:options="options" />
+		-->
 		<el-form
 			ref="loginRef"
 			:model="loginForm"
@@ -112,7 +114,7 @@ const loginRules = {
 const codeUrl = ref("")
 const loading = ref(false)
 // 验证码开关
-const captchaEnabled = ref(true)
+const captchaEnabled = ref(false)
 // 注册开关
 const register = ref(true)
 const redirect = ref(undefined)
@@ -125,13 +127,13 @@ watch(
 	{ immediate: true }
 )
 
-const particlesInit = async (engine) => {
+/* const particlesInit = async (engine) => {
 	await loadSlim(engine)
-}
+} */
 
-const particlesLoaded = async (container) => {
+/* const particlesLoaded = async (container) => {
 	console.log("loaded", container)
-}
+} */
 
 function handleLogin() {
 	proxy.$refs.loginRef.validate((valid) => {
