@@ -15,6 +15,17 @@
       class="register-form"
     >
       <h3 class="title">注册</h3>
+      <el-form-item prop="userType">
+        <el-select
+          v-model="registerForm.userType"
+          size="large"
+          placeholder="用户类型"
+          style="width: 100%"
+        >
+          <el-option label="患者" value="patient"></el-option>
+          <el-option label="医生" value="doctor"></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item prop="username">
         <el-input
           v-model="registerForm.username"
@@ -158,6 +169,7 @@ const router = useRouter();
 const { proxy } = getCurrentInstance();
 
 const registerForm = ref({
+  userType: "",
   username: "",
   phone: "",
   age: "",
@@ -185,6 +197,9 @@ const equalToPassword = (rule, value, callback) => {
 };
 
 const registerRules = {
+  userType: [
+    { required: true, trigger: "change", message: "请选择用户类型" },
+  ],
   username: [
     { required: true, trigger: "blur", message: "请输入您的用户名" },
     {
