@@ -1,5 +1,6 @@
 import mqtt from 'mqtt'
 import { ref, onUnmounted } from 'vue';
+import { ElMessage } from 'element-plus';
 
 class MQTT {
     constructor(topic) {
@@ -17,20 +18,24 @@ class MQTT {
             reconnectPeriod: 4000,
         };
         this.client = mqtt.connect(this.url, options);
+
+        this.client.on('connect', () => {
+            ElMessage.success("MQTT 客户端已连接")
+        });
         this.client.on('error', (error) => {
-            console.log(error);
+            ElMessage.error(error)
         });
         this.client.on('reconnect', (error) => {
-            console.log(error);
+            ElMessage.error(error)
         });
     }
 
     unsubscribes() {
         this.client.unsubscribe(this.topic, (error) => {
             if (!error) {
-                console.log(this.topic, '取消订阅成功');
+                ElMessage.success('取消订阅成功');
             } else {
-                console.log(this.topic, '取消订阅失败');
+                ElMessage.success('取消订阅失败');
             }
         });
     }
@@ -39,9 +44,9 @@ class MQTT {
         this.client.on('connect', () => {
             this.client.subscribe(this.topic, (error) => {
                 if (!error) {
-                    console.log(this.topic + '订阅成功');
+                    ElMessage.success(`${this.topic}订阅成功`)
                 } else {
-                    console.log('订阅失败');
+                    ElMessage.error('订阅失败');
                 }
             });
         });
@@ -89,12 +94,17 @@ export default {
             startMqtt, closeMqtt
         }
     },
+    // unit8ArrayToString(array) {
+    //     let str = '';
+    //     for (let i = 0; i < array.length; i++) {
+    //         str += String.fromCharCode(array[i]);
+    //     }
+    //     return str;
+    // },
     unit8ArrayToString(array) {
-        let str = '';
-        for (let i = 0; i < array.length; i++) {
-            str += String.fromCharCode(array[i]);
-        }
-        return str;
+        // 创建一个新的 TextDecoder 实例，指定编码为 UTF-8
+        const decoder = new TextDecoder('utf-8');
+        return decoder.decode(array);
     },
     unit8ArrayToJson(array) {
         return JSON.parse(this.unit8ArrayToString(array))
