@@ -117,9 +117,9 @@ export const constantRoutes = [
     redirect: 'noredirect',
     children: [
       {
-        path:'historyStatus',
-        component: () => import('@/views/message/historyStatus/index.vue'),
-        name: 'HistoryStatus'
+        path:'case',
+        component: () => import('@/views/message/case/index.vue'),
+        name: 'case'
       },
       {
         path:'useHistory',

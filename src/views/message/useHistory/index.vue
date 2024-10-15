@@ -1,134 +1,148 @@
 <template>
-  <div>
-    <el-page-header content="使用记录（患者）" />
-    <el-card class="patient-selection-card">
-      <h3>选择患者</h3>
-      <el-select v-model="selectedPatient" placeholder="请选择患者" @change="fetchHistory" style="width: 100%;">
-        <el-option
-          v-for="patient in patients"
-          :key="patient.id"
-          :label="patient.name"
-          :value="patient.id"
-        />
-      </el-select>
-    </el-card>
-    <el-card v-if="selectedPatient" class="history-card">
-      <h2>患者 {{ getPatientName(selectedPatient) }} 的历史记录</h2>
-      <p>使用次数: {{ history.length }}</p>
-      <p>使用频率: {{ calculateUsageFrequency(history) }}</p>
-      <el-table :data="history" style="width: 100%;">
-        <el-table-column prop="usageTime" label="使用时间" width="180"/>
-        <el-table-column prop="height" label="高度" width="100"/>
-        <el-table-column prop="angle" label="倾斜角度" width="100"/>
-        <el-table-column prop="pressure" label="压力" width="100"/>
-        <el-table-column prop="duration" label="时长" width="100"/>
-        <el-table-column prop="device.name" label="设备" width="120"/>
-        <el-table-column prop="location" label="位置" width="150"/>
-        <el-table-column prop="age" label="年龄" width="80"/>
-        <el-table-column prop="gender" label="性别" width="80"/>
-      </el-table>
-    </el-card>
-  </div>
+	<div class="top-bar">
+		<!-- 卡片部分 -->
+		<div class="top-all-bar">
+			<el-card class="info-card">
+				<div class="content">
+					<img
+						class="card-icon"
+						src="@/assets/icons/svg/useCount.svg"
+						alt="总共使用图标" />
+					<div class="text-content">
+						<el-text class="card-value">{{ times }}次</el-text>
+						<el-text class="card-label">总共使用</el-text>
+					</div>
+				</div>
+			</el-card>
+			<el-card class="info-card">
+				<div class="content">
+					<img
+						class="card-icon"
+						src="@/assets/icons/svg/newUse.svg"
+						alt="最近使用图标" />
+					<div class="text-content">
+						<el-text class="card-value">{{ times }}次</el-text>
+						<el-text class="card-label">最近一个月使用</el-text>
+					</div>
+				</div>
+			</el-card>
+			<el-card class="info-card">
+				<div class="content">
+					<img
+						class="card-icon"
+						src="@/assets/icons/svg/device.svg"
+						alt="设备数图标" />
+					<div class="text-content">
+						<el-text class="card-value">{{ deviceNum }}</el-text>
+						<el-text class="card-label">设备数</el-text>
+					</div>
+				</div>
+			</el-card>
+		</div>
+		<!-- 图表部分 -->
+		<div class="chart-card">
+			<el-card>
+				<template #header>
+					<div>
+						<el-text class="card-label">近一个月使用记录</el-text>
+					</div>
+				</template>
+				<base-line :xAxis="useRecordList" :yAxis="dataRecordList"></base-line>
+			</el-card>
+		</div>
+	</div>
+
+	<page-list :record-list="useRecordList" @close=""></page-list>
+
 </template>
 
-<script>
-import { ref, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
-import axios from 'axios';
+<script setup>
+import BaseLine from "../../charts/baseLine.vue"
+import { getUseRecord, getRecord } from "@/api/manage/log.js"
+import { onMounted, ref } from "vue"
+import {getLastMonthDates,getRandomData} from "@/utils/time.js"
+import PageList from "./pageList.vue"
 
-export default {
-  name: 'HistoryPage',
-  setup() {
-    const patients = ref([]);
-    const selectedPatient = ref(null);
-    const history = ref([]);
+const useRecordList = ref([1, 2, 3, 4, 5, 6, 7, 8])
+const dataRecordList = ref([1, 2, 3, 4, 5, 6, 7, 8])
+const times = ref(0)
+const deviceNum = ref(0)
 
-    onMounted(() => {
-      fetchPatients();
-    });
 
-    const fetchPatients = async () => {
-      // 示例患者数据
-      patients.value = [
-        { id: 1, name: '张三' },
-        { id: 2, name: '李四' },
-        { id: 3, name: '王五' },
-      ];
-      // API 请求来获取患者列表
-      // try {
-      //   const response = await axios.get('/api/patients');
-      //   patients.value = response.data;
-      // } catch (error) {
-      //   ElMessage.error('获取患者列表失败');
-      // }
-    };
+useRecordList.value = getLastMonthDates()
+dataRecordList.value = getRandomData(30)
+onMounted(() => {
+	// 获取使用记录
+	getUseRecord().then((res) => {
+		useRecordList.value = res.data
+	})
 
-    const fetchHistory = async () => {
-      if (!selectedPatient.value) return;
-      // 示例历史记录数据
-      history.value = [
-        {
-          id: 1,
-          usageTime: '2023-07-01 10:00:00',
-          height: 120,
-          angle: 30,
-          pressure: 15,
-          duration: 30,
-          device: { name: '脊柱矫正椅1号' },
-          location: '北京',
-          age: 25,
-          gender: '男', 
-        },
-        {
-          id: 2,
-          usageTime: '2023-07-02 11:00:00',
-          height: 130,
-          angle: 35,
-          pressure: 18,
-          duration: 25,
-          device: { name: '脊柱矫正椅2号' },
-          location: '上海',
-          age: 25,
-          gender: '男',
-        },
-      ];
-      // 用实际的 API 请求来获取历史记录
-      // try {
-      //   const response = await axios.get(`/api/history/patient/${selectedPatient.value}`);
-      //   history.value = response.data;
-      // } catch (error) {
-      //   ElMessage.error('获取历史记录失败');
-      // }
-    };
-
-    const getPatientName = (id) => {
-      const patient = patients.value.find(p => p.id === id);
-      return patient ? patient.name : '';
-    };
-
-    const calculateUsageFrequency = (history) => {
-      const daysUsed = new Set(history.map(record => new Date(record.usageTime).toDateString()));
-      return (history.length / daysUsed.size).toFixed(2);
-    };
-
-    return {
-      patients,
-      selectedPatient,
-      history,
-      fetchHistory,
-      getPatientName,
-      calculateUsageFrequency,
-    };
-  },
-};
+	// 获取数据记录
+	getRecord().then((res) => {
+		dataRecordList.value = res.data
+	})
+})
 </script>
 
-<style scoped>
-.patient-selection-card {
-  margin-bottom: 20px;
+<style lang="css" scoped>
+.top-bar {
+	display: flex;
+	flex-direction: column;
 }
 
-.history-card {
-  margin-top: 20px;
+.top-all-bar {
+	display: flex;
+	justify-content: center; /* 均匀分布卡片 */
+	padding-top: 30px;
+	padding-bottom: 30px;
+	gap: 15%; /* 卡片间距 */
+}
+
+.info-card {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	max-width: 300px; /* 限制每个卡片的最大宽度 */
+	border-radius: 15px;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); /* 添加轻微的阴影效果 */
+	height: auto;
+}
+
+.card-value {
+	font-size: 26px; /* 调整值的字体大小 */
+	font-weight: bold;
+	line-height: 1.2;
+}
+
+.card-label {
+	font-size: 18px; /* 调整标签的字体大小 */
+	color: #888; /* 使标签颜色较浅 */
+}
+
+.content {
+	display: flex;
+	align-items: center; /* 垂直居中图标和文本 */
+	width: 100%;
+	padding: 10px;
+}
+
+.card-icon {
+	width: 60px; /* 图标宽度 */
+	height: 60px; /* 图标高度 */
+	margin-right: 15px; /* 图标与文本间距 */
+}
+
+.text-content {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start; /* 使文本左对齐 */
+}
+.chart-card {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	height: auto;
 }
 </style>

@@ -77,7 +77,7 @@ import { onUnmounted, ref, watch } from "vue"
 import { ElMessage } from "element-plus"
 import useDeviceStroe from "@/store/modules/device.js"
 import { getNowTime } from "@/utils/time.js"
-import log from "@/api/manage/log.js"
+import { updateRecord, addUseRecord } from "@/api/manage/log.js"
 
 const openAddSubscribeForm = ref(false)
 const { startMqtt, closeMqtt } = mqtt.useMqtt()
@@ -107,13 +107,12 @@ const subscribe = (addSubscribeForm) => {
 			(topic, payload, packet) => {
 				let devId = topic.split("/")[2]
 				deviceMessageDict.value[devId] = mqtt.unit8ArrayToJson(payload)
-				console.log(deviceMessageDict.value)
 				isEmpty.value = false
 			}
 		)
 		// 定时器每分钟上传传感器数据
 		updateControllerId = setInterval(() => {
-			log.updateRecord(deviceMessageDict.value)
+			updateRecord(deviceMessageDict.value)
 		}, 60000)
 	}
 	if (!isEmpty.value) {
@@ -132,7 +131,7 @@ const reset = () => {
 
 	// 添加使用记录
 	for (const key in deviceMessageDict.value) {
-		log.addUseRecord(
+		addUseRecord(
 			deviceStore.startUseTime,
 			deviceStore.endUseTime,
 			deviceMessageDict.value[key].device_id
