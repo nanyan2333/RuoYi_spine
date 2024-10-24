@@ -6,14 +6,14 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, toRefs } from "vue"
-// 按需导入ECharts核心和组件
+import { onMounted, onBeforeUnmount, ref, toRefs, watch } from "vue"
 import * as echarts from "echarts/core"
 import { LineChart } from "echarts/charts"
 import {
 	TooltipComponent,
 	LegendComponent,
 	GridComponent,
+	TitleComponent
 } from "echarts/components"
 import { CanvasRenderer } from "echarts/renderers"
 
@@ -24,18 +24,18 @@ echarts.use([
 	LegendComponent,
 	GridComponent,
 	CanvasRenderer,
+	TitleComponent
 ])
 
-// 使用ref定义图表DOM的引用
 const chartRef = ref(null)
 let chartInstance = null
 const data = defineProps({
 	xAxis: {
-		type: Array,
+		type: [Object],
 		require: true,
 	},
 	yAxis: {
-		type: Array,
+		type: [Object],
 		require: true,
 	},
 	height: {
@@ -50,19 +50,27 @@ const data = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	title: {
+		type: String,
+		default: "Line Chart",
+	},
 })
-const { xAxis, yAxis, height, width, smooth } = toRefs(data)
-// 初始化图表的函数
+
+const { xAxis, yAxis, height, width, smooth, title } = toRefs(data)
+
 const initChart = () => {
 	if (chartRef.value) {
-		// 初始化ECharts实例
 		chartInstance = echarts.init(chartRef.value)
+		updateChart()
+	}
+}
 
-		// 配置选项
+const updateChart = () => {
+	if (chartInstance) {
 		const option = {
+			title: { text: title.value },
 			legend: {},
 			tooltip: {},
-
 			xAxis: { type: "category", data: xAxis.value },
 			yAxis: { type: "value" },
 			series: [
@@ -72,27 +80,31 @@ const initChart = () => {
 					label: {
 						show: true,
 					},
-					smooth: smooth.value, // 平滑曲线
+					smooth: smooth.value,
 				},
 			],
 		}
-
-		// 应用选项
-		chartInstance.setOption(option)
+		chartInstance.setOption(option) // 重新渲染
 	}
 }
 
-// 在组件挂载时初始化图表
 onMounted(() => {
 	initChart()
 })
 
-// 在组件销毁前销毁图表实例，防止内存泄漏
 onBeforeUnmount(() => {
 	if (chartInstance) {
 		chartInstance.dispose()
 	}
 })
+
+watch(
+	() => data.xAxis,
+	() => {
+		updateChart()
+	},
+	{ deep: true }
+)
 </script>
 
 <style scoped>

@@ -19,18 +19,30 @@ export function addUseRecord(startTime, endTime, deviceId) {
 // 上传传感器产生的数据
 /* deviceMessageDict
     {
-        #{product_id}:{
+        #{device_id}:{
             "device_id":xxxxx,
             "distance": xxx,
             ......
         }
     }
 */
-export function updateRecord(deviceMessageDict) {
-    let time = getNowTime()
+export function updateRecord(id, deviceMessageArray) {
+    /*
+        deviceMessageArray:[
+            ......
+            {
+                'time':xxxx-xx-xx xx:xx:xx, 
+                'sensorInfo':{ 
+                    "device_id":xxxxx,
+                    "distance": xxx, 
+                    ......
+                }
+            }
+        ]
+    */
     let data = {
-        'time': time,
-        'sensor_info': deviceMessageDict
+        'id': id,
+        'deviceMessageArray': deviceMessageArray
     }
     return request(
         {
@@ -41,13 +53,17 @@ export function updateRecord(deviceMessageDict) {
     )
 }
 // 获取上传的数据
-export function getRecord() {
+export function getRecord(_deviceId) {
     return request(
         {
             url: 'manage/getRecord',
-            methods: "get"
+            methods: "get",
+            params: {
+                device_id: _deviceId
+            }
         }
     )
+    
 }
 // 获取上传的使用记录
 export function getUseRecord() {

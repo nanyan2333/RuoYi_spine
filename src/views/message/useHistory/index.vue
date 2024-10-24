@@ -1,5 +1,10 @@
 <template>
-	<div class="top-bar">
+	<div class="top-bar" v-if="!showPageList && loadFinish">
+		<div class="button-field" style="width: 100%; padding: 5; margin: 0">
+			<el-button type="primary" @click="showPageList = true">
+				查看详细使用记录
+			</el-button>
+		</div>
 		<!-- 卡片部分 -->
 		<div class="top-all-bar">
 			<el-card class="info-card">
@@ -9,7 +14,7 @@
 						src="@/assets/icons/svg/useCount.svg"
 						alt="总共使用图标" />
 					<div class="text-content">
-						<el-text class="card-value">{{ times }}次</el-text>
+						<el-text class="card-value">{{ total }}次</el-text>
 						<el-text class="card-label">总共使用</el-text>
 					</div>
 				</div>
@@ -21,7 +26,7 @@
 						src="@/assets/icons/svg/newUse.svg"
 						alt="最近使用图标" />
 					<div class="text-content">
-						<el-text class="card-value">{{ times }}次</el-text>
+						<el-text class="card-value">{{ total }}次</el-text>
 						<el-text class="card-label">最近一个月使用</el-text>
 					</div>
 				</div>
@@ -40,46 +45,68 @@
 			</el-card>
 		</div>
 		<!-- 图表部分 -->
-		<div class="chart-card">
-			<el-card>
-				<template #header>
-					<div>
-						<el-text class="card-label">近一个月使用记录</el-text>
-					</div>
-				</template>
-				<base-line :xAxis="useRecordList" :yAxis="dataRecordList"></base-line>
-			</el-card>
+		<div>
+			<div class="chart-card" v-if="loadFinish">
+				<el-card>
+					<template #header>
+						<div>
+							<el-text class="card-label">使用统计</el-text>
+						</div>
+					</template>
+					<base-line :xAxis="xAxis" :yAxis="yAxis"></base-line>
+				</el-card>
+			</div>
 		</div>
 	</div>
-
-	<page-list :record-list="useRecordList" @close=""></page-list>
-
+	<div v-else-if="!loadFinish" >
+		<load-animate></load-animate>
+	</div>
+	<page-list
+		v-else
+		:record-list="useRecordList"
+		@close="
+			(val) => {
+				showPageList = val
+			}
+		"></page-list>
 </template>
 
 <script setup>
 import BaseLine from "../../charts/baseLine.vue"
 import { getUseRecord, getRecord } from "@/api/manage/log.js"
 import { onMounted, ref } from "vue"
-import {getLastMonthDates,getRandomData} from "@/utils/time.js"
+import { getLastMonthDates, getRandomData } from "@/utils/time.js"
 import PageList from "./pageList.vue"
+import useDeviceStore from "@/store/modules/device.js"
+import LoadAnimate from "@/components/LoadingAnimate/index.vue"
 
-const useRecordList = ref([1, 2, 3, 4, 5, 6, 7, 8])
-const dataRecordList = ref([1, 2, 3, 4, 5, 6, 7, 8])
-const times = ref(0)
-const deviceNum = ref(0)
+const deviceStore = useDeviceStore()
+const useRecordList = ref([])
+const deviceNum = ref(deviceStore.total)
+const showPageList = ref(false)
+const total = ref(0)
+const xAxis = ref([])
+const yAxis = ref([])
+const loadFinish = ref(false)
 
-
-useRecordList.value = getLastMonthDates()
-dataRecordList.value = getRandomData(30)
 onMounted(() => {
 	// 获取使用记录
 	getUseRecord().then((res) => {
-		useRecordList.value = res.data
-	})
-
-	// 获取数据记录
-	getRecord().then((res) => {
-		dataRecordList.value = res.data
+		console.log(res)
+		total.value = res.total
+		useRecordList.value = res.raw
+		let tmp = {}
+		for (const item of useRecordList.value) {
+			let date = item.start_time.split(" ")[0]
+			if (date in tmp) {
+				tmp[date] += 1
+			} else {
+				tmp[date] = 1
+			}
+		}
+		xAxis.value = Object.keys(tmp)
+		yAxis.value = Object.values(tmp)
+		loadFinish.value = true
 	})
 })
 </script>
@@ -93,7 +120,7 @@ onMounted(() => {
 .top-all-bar {
 	display: flex;
 	justify-content: center; /* 均匀分布卡片 */
-	padding-top: 30px;
+	padding-top: 5px;
 	padding-bottom: 30px;
 	gap: 15%; /* 卡片间距 */
 }
@@ -145,4 +172,11 @@ onMounted(() => {
 	width: 100%;
 	height: auto;
 }
+.button-field {
+	display: flex;
+	flex-direction: row-reverse;
+	padding: 30px;
+	margin-right: 50px;
+}
+
 </style>
